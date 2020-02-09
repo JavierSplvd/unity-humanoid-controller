@@ -14,7 +14,7 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
-        //cameraOrbit.position = Vector3.SmoothDamp(target.position, cameraOrbit.position, ref velocity, smoothTime);
+        cameraOrbit.position = Vector3.SmoothDamp(target.position, cameraOrbit.position, ref velocity, smoothTime);
         transform.rotation = Quaternion.Euler(transform.rotation.x, transform.rotation.y, 0);
 
         transform.LookAt(target.position);

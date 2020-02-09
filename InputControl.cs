@@ -15,7 +15,7 @@ public class InputControl : MonoBehaviour {
             float v = rotateSpeed * Input.GetAxis("Mouse Y");
 
             float polarAngle = Vector3.Angle(Vector3.up, cameraOrbit.transform.forward);
-            Debug.Log("Angle: " + polarAngle);
+            // Debug.Log("Angle: " + polarAngle);
 
             if (polarAngle < 10f){
                 v = 0;

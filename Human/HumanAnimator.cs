@@ -6,20 +6,42 @@ public class HumanAnimator : MonoBehaviour
 {
 
     public GameObject target;
-    public float targetOffsetToTheGround;
-    public float interpolationStep;
+    private HumanController hc;
+
+    public float targetOffsetToTheGround = 0.5f;
+    public float interpolationStep = 1f;
+    public float minVelocityToSteer = 0.05f;
+    public float minVelocityThresholdToConsiderWalking = 0.3f;
+    public float minSqrVelocityToConsiderRunning = 15f;
+    public Animator model;
+
+    public float angleDiffCoefficient = 0f;
+
+    public string walkingParam = "isWalking";
+    public string idleParam = "isIdle";
+    public string runningParam = "isRunning";
+    public string jumpingParam = "isJumping";
+    public string directionParam = "direction";
+    public string sqrVelocityparam = "sqrVelocity";
+    public string idlePivotingLeftParam = "idlePivotingLeft";
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        model = GetComponent<Animator>();
+        HumanController hc = target.GetComponent<HumanController>();
+
     }
 
     // Update is called once per frame
     void LateUpdate()
     {
+        ClearAnimatorParams();
+
         UpdatePosition();
         Steer();
+        Animate();
+        // GetAngleDiff();
     }
 
     void UpdatePosition(){
@@ -29,7 +51,60 @@ public class HumanAnimator : MonoBehaviour
 
     void Steer(){
         Vector3 velocityProjected = Vector3.ProjectOnPlane(target.GetComponent<Rigidbody>().velocity, Vector3.up);
-        Quaternion targetVelocity = Quaternion.LookRotation(velocityProjected, Vector3.up);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetVelocity, interpolationStep);
+        if(velocityProjected.sqrMagnitude > minVelocityToSteer)
+        {
+            Quaternion targetVelocity = Quaternion.LookRotation(velocityProjected, Vector3.up);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetVelocity, interpolationStep);
+
+        }
+        
+    }
+
+    void Animate(){
+        float vel = hc.GetHorizontalSqrVelocity();
+
+        bool isJumping = 
+
+        if(vel < minVelocityThresholdToConsiderWalking)
+        {
+            model.SetBool(idleParam, true);
+        } 
+        else if (vel > minSqrVelocityToConsiderRunning)
+        {
+            model.SetBool(runningParam, true);
+        } 
+        else {
+            model.SetBool(walkingParam, true);
+        }
+    }
+
+    void AnimatePivoting(){
+        model.SetBool(idlePivotingLeftParam, true);
+    }
+
+    void ClearAnimatorParams(){
+        model.SetBool(idleParam, false);
+        model.SetBool(walkingParam, false);
+        model.SetBool(runningParam, false);
+        model.SetBool(idlePivotingLeftParam, false);
+        model.SetBool(isJumping, false);
+    }
+
+    void GetAngleDiff() {
+        bool inputDirectionIsNotZero = this.hc.GetInputDirection().sqrMagnitude > 0.09f;
+        if(inputDirectionIsNotZero) { 
+            // A dot product of 1 means they are parallel.
+            Debug.Log(Vector3.Dot(this.hc.GetInputDirection(), transform.forward));
+            angleDiffCoefficient = 1 - Vector3.Dot(this.hc.GetInputDirection(), transform.forward);
+            model.SetFloat(directionParam, angleDiffCoefficient);
+        }
+        float targetVelocity = this.hc.GetHorizontalSqrVelocity();
+        if(targetVelocity > minVelocityThresholdToConsiderWalking) {
+            model.SetFloat(directionParam, 0);
+        }
+        model.SetFloat(sqrVelocityparam, targetVelocity);
+
+        Debug.DrawRay(transform.position, this.hc.GetInputDirection(), Color.blue);
+        Debug.DrawRay(transform.position, transform.forward, Color.green);
     }
 }

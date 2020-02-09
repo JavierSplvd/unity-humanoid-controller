@@ -11,7 +11,7 @@ public class HumanController : MonoBehaviour
 
     public float rigidBodyGroundDrag = 0f;
     public float rigidBodyAirDrag = 0f;
-    public float rigidBodyStillDrag = 4f;
+    public float rigidBodyStillDrag = 8f;
     public float walkingForce = 20f;
     public float runningForce = 50f;
     public float jumpForce = 200f;
@@ -101,6 +101,8 @@ public class HumanController : MonoBehaviour
     {
         if (Input.GetKeyUp("space") && IsGrounded())
         {
+            Debug.Log("Jumping");
+
             _rigidBody.AddForceAtPosition(Vector3.up * jumpForce, transform.position);
         }
     }

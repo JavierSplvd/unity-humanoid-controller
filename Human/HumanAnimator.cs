@@ -13,7 +13,7 @@ public class HumanAnimator : MonoBehaviour
     public float minVelocityToSteer = 0.05f;
     public float minVelocityThresholdToConsiderWalking = 0.3f;
     public float minSqrVelocityToConsiderRunning = 15f;
-    public Animator model;
+    private Animator model;
 
     public float angleDiffCoefficient = 0f;
 
@@ -21,6 +21,7 @@ public class HumanAnimator : MonoBehaviour
     public string idleParam = "isIdle";
     public string runningParam = "isRunning";
     public string jumpingParam = "isJumping";
+    public string fallingParam = "isFalling";
     public string directionParam = "direction";
     public string sqrVelocityparam = "sqrVelocity";
     public string idlePivotingLeftParam = "idlePivotingLeft";
@@ -29,7 +30,7 @@ public class HumanAnimator : MonoBehaviour
     void Start()
     {
         model = GetComponent<Animator>();
-        HumanController hc = target.GetComponent<HumanController>();
+        hc = target.GetComponent<HumanController>();
 
     }
 
@@ -61,9 +62,19 @@ public class HumanAnimator : MonoBehaviour
     }
 
     void Animate(){
-        float vel = hc.GetHorizontalSqrVelocity();
+        float vel = this.hc.GetHorizontalSqrVelocity();
 
-        bool isJumping = 
+        bool isJumping = this.hc.IsJumpingAndGoingUpwards();
+        if(isJumping){
+            model.SetBool(jumpingParam, true);
+            return;
+        }
+        bool isFalling = this.hc.IsFalling();
+        if(isFalling) {
+            model.SetBool(fallingParam, true);
+            return;
+        }
+
 
         if(vel < minVelocityThresholdToConsiderWalking)
         {
@@ -87,7 +98,8 @@ public class HumanAnimator : MonoBehaviour
         model.SetBool(walkingParam, false);
         model.SetBool(runningParam, false);
         model.SetBool(idlePivotingLeftParam, false);
-        model.SetBool(isJumping, false);
+        model.SetBool(jumpingParam, false);
+        model.SetBool(fallingParam, false);
     }
 
     void GetAngleDiff() {

@@ -6,6 +6,8 @@ using UnityEngine;
 public class HumanController : MonoBehaviour {
     private Rigidbody _rigidBody;
 
+    public float minSqrVerticalVelocity = 0.25f;
+
     public float rigidBodyGroundDrag = 0f;
     public float rigidBodyAirDrag = 0f;
     public float rigidBodyStillDrag = 4f;
@@ -92,5 +94,13 @@ public class HumanController : MonoBehaviour {
 
     public float GetHorizontalSqrVelocity() {
         return Vector3.ProjectOnPlane(_rigidBody.velocity, Vector3.up).sqrMagnitude;
+    }
+
+    public bool IsJumpingAndGoingUpwards() {
+        return !IsGrounded() && _rigidBody.velocity.y > minSqrVerticalVelocity;
+    }
+
+    public bool IsFalling() {
+        return !IsGrounded() && _rigidBody.velocity.y < - minSqrVerticalVelocity;
     }
 }

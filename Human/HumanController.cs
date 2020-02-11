@@ -2,61 +2,72 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(CapsuleCollider))]
 public class HumanController : MonoBehaviour
 {
-    private Rigidbody _rigidBody;
-
-    public float minSqrVerticalVelocity = 0.25f;
-
-    public float rigidBodyGroundDrag = 0f;
-    public float rigidBodyAirDrag = 0f;
-    public float rigidBodyStillDrag = 8f;
-    public float walkingForce = 20f;
-    public float runningForce = 50f;
-    public float jumpForce = 200f;
-    public float distToGround = 0.5f;
+    private Animator anim;
+    private CapsuleCollider capsuleCollider;
+    private Vector3 inputWorldCoordinates;
+    private Vector3 inputCameraReference;
     public Transform movementAxis;
-    public float maxSqrVelocity = 10f;
-    public float maxSqrRunningVelocity = 30f;
-    public float currentSqrVelocity;
-    // Start is called before the first frame update
+    public float distToGround = 0.1f;
+    public float singleStep = 1f;
+    public bool shouldSteer = true;
+    public string pivotStateName = "Pivot";
+    public string locomotionToPivotStateName = "Locomotion -> Pivot";
+    private float angle = 0f;
+
     void Start()
     {
-        _rigidBody = GetComponent<Rigidbody>();
-        _rigidBody.drag = rigidBodyGroundDrag;
+        anim = GetComponent<Animator>();
+        capsuleCollider = GetComponent<CapsuleCollider>();
+        inputWorldCoordinates = new Vector3();
+        inputCameraReference = new Vector3();
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
-        Translation();
-        Jump();
-        Stop();
-        currentSqrVelocity = _rigidBody.velocity.sqrMagnitude;
+        float h = Input.GetAxis("Horizontal");
+        float v = Input.GetAxis("Vertical");
+        inputWorldCoordinates = GetInputInWorldCoordinates(h, v);
+        inputCameraReference = GetInputWithCameraAsReferenceCoordinates();
+        anim.SetFloat("forward", inputCameraReference.magnitude);
+        angle = Vector3.Angle(inputCameraReference, transform.forward);
+        anim.SetFloat("direction", angle);
+        Debug.DrawRay(transform.position, inputWorldCoordinates * 10, Color.green);
+        Debug.DrawRay(transform.position, inputCameraReference * 10, Color.blue);
+        Debug.DrawRay(transform.position, movementAxis.forward * 10, Color.yellow);
     }
 
-    void Translation()
-    {
-        Vector3 inputMovementDirection = GetInputDirection();
-        if (inputMovementDirection.sqrMagnitude > 1)
-        {
-            inputMovementDirection = inputMovementDirection.normalized;
-        }
-        float translationForce = walkingForce;
-        float maxVelocity = maxSqrVelocity;
-        if (Input.GetKey("left shift"))
-        {
-            Debug.Log("Running");
-            translationForce = runningForce;
-            maxVelocity = maxSqrRunningVelocity;
-        }
-        Accelerate(maxVelocity, translationForce, inputMovementDirection);
-
-
+    void LateUpdate() {        
+        Steer();
     }
 
-    public Vector3 GetInputDirection()
+
+    void Steer()
+    {
+        if (!shouldSteer)
+        {
+            return;
+        }
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName(pivotStateName) || anim.GetAnimatorTransitionInfo(0).IsName(locomotionToPivotStateName))
+        {
+            return;
+        }
+        if (inputCameraReference.sqrMagnitude < 0.01f)
+        {
+            return;
+        }
+        Vector3 newDirection = Vector3.RotateTowards(transform.forward, inputCameraReference, singleStep * angle / 180, 0.0f);
+
+        Quaternion rotation = Quaternion.LookRotation(newDirection, Vector3.up);
+        transform.rotation = rotation;
+    }
+
+
+    public Vector3 GetInputWithCameraAsReferenceCoordinates()
     {
         Vector3 forwardProjected = Vector3.ProjectOnPlane(movementAxis.forward * Input.GetAxis("Vertical"), Vector3.up);
         Vector3 rightProjected = Vector3.ProjectOnPlane(movementAxis.right * Input.GetAxis("Horizontal"), Vector3.up);
@@ -65,65 +76,31 @@ public class HumanController : MonoBehaviour
         return inputMovementDirection;
     }
 
-    void Accelerate(float maxVelocity, float translationForce, Vector3 movementVector)
+    public Vector3 GetInputInWorldCoordinates(float horizontal, float vertical)
     {
-        if (_rigidBody.velocity.sqrMagnitude > maxVelocity)
-        {
-            _rigidBody.AddForceAtPosition(-_rigidBody.velocity.normalized * translationForce, transform.position);
-            Debug.DrawRay(transform.position, -_rigidBody.velocity.normalized, Color.green);
-        }
-        _rigidBody.AddForceAtPosition(movementVector * translationForce, transform.position);
-        Debug.DrawRay(transform.position, movementVector, Color.green);
-    }
+        Vector3 forwardProjected = Vector3.ProjectOnPlane(Vector3.forward * vertical, Vector3.up);
+        Vector3 rightProjected = Vector3.ProjectOnPlane(Vector3.right * horizontal, Vector3.up);
 
-    void Stop()
-    {
-        if (Input.GetAxis("Horizontal") == 0 && Input.GetAxis("Vertical") == 0 && IsGrounded())
-        {
-            _rigidBody.drag = rigidBodyStillDrag;
-        }
-        else if (!IsGrounded())
-        {
-            _rigidBody.drag = rigidBodyAirDrag;
-        }
-        else
-        {
-            _rigidBody.drag = rigidBodyGroundDrag;
-        }
+        Vector3 inputMovementDirection = forwardProjected + rightProjected;
+        return inputMovementDirection;
     }
 
     public bool IsGrounded()
     {
-        return Physics.Raycast(transform.position, -Vector3.up, distToGround + 0.1f);
+        return Physics.Raycast(transform.position, -Vector3.up, distToGround);
     }
 
     void Jump()
     {
         if (Input.GetKeyUp("space") && IsGrounded())
         {
-            Debug.Log("Jumping");
 
-            _rigidBody.AddForceAtPosition(Vector3.up * jumpForce, transform.position);
         }
     }
 
     float GetDotProductVelocityInputDirection()
     {
-        return Vector3.Dot(GetInputDirection(), _rigidBody.velocity.normalized);
+        return Vector3.Dot(GetInputWithCameraAsReferenceCoordinates(), transform.forward);
     }
 
-    public float GetHorizontalSqrVelocity()
-    {
-        return Vector3.ProjectOnPlane(_rigidBody.velocity, Vector3.up).sqrMagnitude;
-    }
-
-    public bool IsJumpingAndGoingUpwards()
-    {
-        return _rigidBody.velocity.y > minSqrVerticalVelocity;
-    }
-
-    public bool IsFalling()
-    {
-        return !IsGrounded() && _rigidBody.velocity.y < -minSqrVerticalVelocity;
-    }
 }

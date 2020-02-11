@@ -18,6 +18,8 @@ public class HumanController : MonoBehaviour
     public string locomotionToPivotStateName = "Locomotion -> Pivot";
     private float angle = 0f;
 
+    private int randomIdleState = 0;
+
     void Start()
     {
         anim = GetComponent<Animator>();
@@ -39,6 +41,9 @@ public class HumanController : MonoBehaviour
         Debug.DrawRay(transform.position, inputWorldCoordinates * 10, Color.green);
         Debug.DrawRay(transform.position, inputCameraReference * 10, Color.blue);
         Debug.DrawRay(transform.position, movementAxis.forward * 10, Color.yellow);
+
+        randomIdleState = Random.Range(0, 10);
+        anim.SetInteger("random idle", randomIdleState);
     }
 
     void LateUpdate() {        

@@ -16,7 +16,18 @@ public class HumanController : MonoBehaviour
     public bool shouldSteer = true;
     public string pivotStateName = "Pivot";
     public string locomotionToPivotStateName = "Locomotion -> Pivot";
+    public string locomotionJumpToLocomotionName = "Locomotion jump -> Locomotion";
+    public string fallingToIdleName = "Falling -> Idle";
+    public string idleJumpStateName = "Idle jump";
+    public string locomotionJumpStateName = "Locomotion jump";
+    public string fallingStateName = "Falling";
     private float angle = 0f;
+    public bool debugGrounded = false;
+    public AnimationCurve jumpCurve;
+
+
+    [Tooltip("Capa de los objetos donde se puede ajustar el pie")]
+    public LayerMask rayMask;
 
     private int randomIdleState = 0;
 
@@ -44,12 +55,15 @@ public class HumanController : MonoBehaviour
 
         randomIdleState = Random.Range(0, 10);
         anim.SetInteger("random idle", randomIdleState);
+
+        Jump();
+        Falling();
     }
 
-    void LateUpdate() {        
+    void LateUpdate()
+    {
         Steer();
     }
-
 
     void Steer()
     {
@@ -69,6 +83,20 @@ public class HumanController : MonoBehaviour
 
         Quaternion rotation = Quaternion.LookRotation(newDirection, Vector3.up);
         transform.rotation = rotation;
+    }
+
+    void Falling()
+    {
+        AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
+        if (state.IsName(fallingStateName))
+        {
+            transform.Translate(inputCameraReference.x * 0.1f, 0, inputCameraReference.z*0.1f);
+            anim.applyRootMotion = false;
+        }
+        else{
+            anim.applyRootMotion = true;
+
+        }
     }
 
 
@@ -92,14 +120,49 @@ public class HumanController : MonoBehaviour
 
     public bool IsGrounded()
     {
-        return Physics.Raycast(transform.position, -Vector3.up, distToGround);
+        Vector3 bottomPositionWithOffset = new Vector3(transform.position.x, transform.position.y + distToGround, transform.position.z);
+
+        bool isGrounded = Physics.Raycast(bottomPositionWithOffset, -Vector3.up, distToGround * 2f, rayMask);
+        anim.SetBool("grounded", isGrounded);
+        //Debug.DrawRay(bottomPositionWithOffset, -Vector3.up * 2f * distToGround, Color.green);
+        return isGrounded;
     }
 
     void Jump()
     {
-        if (Input.GetKeyUp("space") && IsGrounded())
+        debugGrounded = IsGrounded();
+        if (Input.GetButtonUp("Jump") && IsGrounded())
         {
+            anim.SetBool("jump", true);
+        }
+        if (anim.GetBool("jump"))
+        {
+            float progress = getProgressOfTheJumpAnimation();
+            float value = jumpCurve.Evaluate(progress);
+            anim.SetFloat("jump height", value);
+            transform.Translate(0, value, 0);
+        }
+        ResetJumpParam();
+    }
 
+    float getProgressOfTheJumpAnimation()
+    {
+        AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
+        if (state.IsName(idleJumpStateName) || state.IsName(locomotionJumpStateName))
+        {
+            return state.normalizedTime;
+        }
+        else
+        {
+            return 0f;
+        }
+    }
+
+    void ResetJumpParam()
+    {
+        if (anim.GetAnimatorTransitionInfo(0).IsName(locomotionJumpToLocomotionName) || anim.GetAnimatorTransitionInfo(0).IsName(fallingToIdleName))
+        {
+            anim.SetBool("jump", false);
         }
     }
 

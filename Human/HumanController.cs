@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(CapsuleCollider))]
+[RequireComponent(typeof(CharacterController))]
 public class HumanController : MonoBehaviour
 {
     private Animator anim;
-    private CapsuleCollider capsuleCollider;
+    private CharacterController characterController;
     private Vector3 inputWorldCoordinates;
     private Vector3 inputCameraReference;
     public Transform movementAxis;
@@ -24,6 +24,16 @@ public class HumanController : MonoBehaviour
     private float angle = 0f;
     public bool debugGrounded = false;
     public AnimationCurve jumpCurve;
+    public float initialJumpSpeed = 10f;
+    public float gravity = 10f;
+    public float m_VerticalSpeed = 0f;
+    private Vector3 airborneMovement;
+    private float airborneCurrentHorizontalSpeed = 0f;
+    [Range(0, 10)]
+    public float airborneInitialHorizontalSpeed;
+    [Range(0, 10)]
+    public float airborneHorizontalDrag;
+
 
 
     [Tooltip("Capa de los objetos donde se puede ajustar el pie")]
@@ -34,9 +44,10 @@ public class HumanController : MonoBehaviour
     void Start()
     {
         anim = GetComponent<Animator>();
-        capsuleCollider = GetComponent<CapsuleCollider>();
+        characterController = GetComponent<CharacterController>();
         inputWorldCoordinates = new Vector3();
         inputCameraReference = new Vector3();
+        airborneMovement = new Vector3(0, 0, 0);
     }
 
     // Update is called once per frame
@@ -56,12 +67,14 @@ public class HumanController : MonoBehaviour
         randomIdleState = Random.Range(0, 10);
         anim.SetInteger("random idle", randomIdleState);
 
-        Jump();
-        Falling();
+        // Jump();
+        // Falling();
     }
 
     void LateUpdate()
     {
+        CalculateVerticalMovement();
+
         Steer();
     }
 
@@ -90,10 +103,11 @@ public class HumanController : MonoBehaviour
         AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
         if (state.IsName(fallingStateName))
         {
-            transform.Translate(inputCameraReference.x * 0.1f, 0, inputCameraReference.z*0.1f);
+            transform.Translate(inputCameraReference.x * 0.1f, 0, inputCameraReference.z * 0.1f);
             anim.applyRootMotion = false;
         }
-        else{
+        else
+        {
             anim.applyRootMotion = true;
 
         }
@@ -124,25 +138,44 @@ public class HumanController : MonoBehaviour
 
         bool isGrounded = Physics.Raycast(bottomPositionWithOffset, -Vector3.up, distToGround * 2f, rayMask);
         anim.SetBool("grounded", isGrounded);
-        //Debug.DrawRay(bottomPositionWithOffset, -Vector3.up * 2f * distToGround, Color.green);
+        Debug.DrawRay(bottomPositionWithOffset, -Vector3.up * 2f * distToGround, Color.green);
         return isGrounded;
     }
 
-    void Jump()
+    void CalculateVerticalMovement()
     {
-        debugGrounded = IsGrounded();
-        if (Input.GetButtonUp("Jump") && IsGrounded())
+        if (IsGrounded())
         {
-            anim.SetBool("jump", true);
+            m_VerticalSpeed = -gravity * Time.deltaTime;
+            if (Input.GetButtonDown("Jump"))
+            {
+                m_VerticalSpeed = initialJumpSpeed;
+                airborneCurrentHorizontalSpeed = airborneInitialHorizontalSpeed * inputCameraReference.sqrMagnitude;
+            }
         }
-        if (anim.GetBool("jump"))
+        else
         {
-            float progress = getProgressOfTheJumpAnimation();
-            float value = jumpCurve.Evaluate(progress);
-            anim.SetFloat("jump height", value);
-            transform.Translate(0, value, 0);
+            if (!Input.GetButtonDown("Jump") && m_VerticalSpeed > 0.0f)
+            {
+                // This is what causes holding jump to jump higher that tapping jump.
+                m_VerticalSpeed -= gravity * Time.deltaTime;
+            }
+
+            // If a jump is approximately peaking, make it absolute.
+            if (Mathf.Approximately(m_VerticalSpeed, 0f))
+            {
+                m_VerticalSpeed = 0f;
+            }
+            m_VerticalSpeed -= gravity * Time.deltaTime;
+            airborneCurrentHorizontalSpeed -= airborneHorizontalDrag * Time.deltaTime;
+            if(airborneCurrentHorizontalSpeed < 0f)
+            {
+                airborneCurrentHorizontalSpeed = 0;
+            }
         }
-        ResetJumpParam();
+        anim.SetFloat("jump speed", m_VerticalSpeed);
+        airborneMovement = m_VerticalSpeed * Vector3.up * Time.deltaTime + inputCameraReference * Time.deltaTime * airborneCurrentHorizontalSpeed;
+        characterController.Move(airborneMovement);
     }
 
     float getProgressOfTheJumpAnimation()

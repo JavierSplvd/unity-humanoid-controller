@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(CapsuleCollider))]
+[RequireComponent(typeof(CharacterController))]
 public class FootIKSmooth : MonoBehaviour
 {
 
@@ -30,12 +30,12 @@ public class FootIKSmooth : MonoBehaviour
     }
 
     void SetupColliderHeights() {
-        GetComponent<CapsuleCollider>().height = characterMaxHeightToCollider;
+        GetComponent<CharacterController>().height = characterMaxHeightToCollider;
     }
 
     RaycastHit hit;
-    void CapsuleColliderAdjustment() {
-        GetComponent<CapsuleCollider>().height = characterMinHeightToCollider + (characterMaxHeightToCollider - characterMinHeightToCollider) * Vector3.Dot(hit.normal, Vector3.up);
+    void CharacterControllerAdjustment() {
+        GetComponent<CharacterController>().height = characterMinHeightToCollider + (characterMaxHeightToCollider - characterMinHeightToCollider) * Vector3.Dot(hit.normal, Vector3.up);
     }
 
 
@@ -46,7 +46,7 @@ public class FootIKSmooth : MonoBehaviour
 			Vector3 FootPos = anim.GetIKPosition(AvatarIKGoal.RightFoot); //Obtenemos posicion del Pie
             if (Physics.Raycast(FootPos + Vector3.up, Vector3.down, out hit, 1.2f, RayMask)) //Lanzamos raycast hacia abajo
             {
-                CapsuleColliderAdjustment();
+                CharacterControllerAdjustment();
 				anim.SetIKPositionWeight(AvatarIKGoal.RightFoot, WeightPositionRight);
 				anim.SetIKRotationWeight(AvatarIKGoal.RightFoot, WeightRotationRight);
 				anim.SetIKPosition(AvatarIKGoal.RightFoot, hit.point + offset); //Posocionamos el pie segun dio el Raycast

@@ -4,12 +4,12 @@ using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(CharacterController))]
-public class HumanController : MonoBehaviour
+public class BaseHumanController : MonoBehaviour
 {
     private Animator anim;
     private CharacterController characterController;
     private Vector3 inputWorldCoordinates;
-    private Vector3 inputCameraReference;
+    private Vector3 inputCameraReferenceSystem;
     public Transform movementAxis;
     public float distToGround = 0.1f;
     public float singleStep = 1f;
@@ -33,6 +33,8 @@ public class HumanController : MonoBehaviour
     public float airborneInitialHorizontalSpeed;
     [Range(0, 10)]
     public float airborneHorizontalDrag;
+    private bool isInDoubleJumpWindow = false;
+    private bool canDoubleJump = true;
 
 
 
@@ -46,7 +48,7 @@ public class HumanController : MonoBehaviour
         anim = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
         inputWorldCoordinates = new Vector3();
-        inputCameraReference = new Vector3();
+        inputCameraReferenceSystem = new Vector3();
         airborneMovement = new Vector3(0, 0, 0);
     }
 
@@ -56,12 +58,12 @@ public class HumanController : MonoBehaviour
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
         inputWorldCoordinates = GetInputInWorldCoordinates(h, v);
-        inputCameraReference = GetInputWithCameraAsReferenceCoordinates();
-        anim.SetFloat("forward", inputCameraReference.magnitude);
-        angle = Vector3.Angle(inputCameraReference, transform.forward);
+        inputCameraReferenceSystem = CalculateInputWithCameraAsReferenceSystem();
+        anim.SetFloat("forward", inputCameraReferenceSystem.magnitude);
+        angle = Vector3.Angle(inputCameraReferenceSystem, transform.forward);
         anim.SetFloat("direction", angle);
         Debug.DrawRay(transform.position, inputWorldCoordinates * 10, Color.green);
-        Debug.DrawRay(transform.position, inputCameraReference * 10, Color.blue);
+        Debug.DrawRay(transform.position, inputCameraReferenceSystem * 10, Color.blue);
         Debug.DrawRay(transform.position, movementAxis.forward * 10, Color.yellow);
 
         randomIdleState = Random.Range(0, 10);
@@ -88,11 +90,11 @@ public class HumanController : MonoBehaviour
         {
             return;
         }
-        if (inputCameraReference.sqrMagnitude < 0.01f)
+        if (inputCameraReferenceSystem.sqrMagnitude < 0.01f)
         {
             return;
         }
-        Vector3 newDirection = Vector3.RotateTowards(transform.forward, inputCameraReference, singleStep * angle / 180, 0.0f);
+        Vector3 newDirection = Vector3.RotateTowards(transform.forward, inputCameraReferenceSystem, singleStep * angle / 180, 0.0f);
 
         Quaternion rotation = Quaternion.LookRotation(newDirection, Vector3.up);
         transform.rotation = rotation;
@@ -103,7 +105,7 @@ public class HumanController : MonoBehaviour
         AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
         if (state.IsName(fallingStateName))
         {
-            transform.Translate(inputCameraReference.x * 0.1f, 0, inputCameraReference.z * 0.1f);
+            transform.Translate(inputCameraReferenceSystem.x * 0.1f, 0, inputCameraReferenceSystem.z * 0.1f);
             anim.applyRootMotion = false;
         }
         else
@@ -114,7 +116,7 @@ public class HumanController : MonoBehaviour
     }
 
 
-    public Vector3 GetInputWithCameraAsReferenceCoordinates()
+    public Vector3 CalculateInputWithCameraAsReferenceSystem()
     {
         Vector3 forwardProjected = Vector3.ProjectOnPlane(movementAxis.forward * Input.GetAxis("Vertical"), Vector3.up);
         Vector3 rightProjected = Vector3.ProjectOnPlane(movementAxis.right * Input.GetAxis("Horizontal"), Vector3.up);
@@ -142,39 +144,60 @@ public class HumanController : MonoBehaviour
         return isGrounded;
     }
 
+    void ActivateDoubleJump(bool isGrounded)
+    {
+        if (m_VerticalSpeed < 0f)
+        {
+            isInDoubleJumpWindow = true;
+        }
+        else
+        {
+            isInDoubleJumpWindow = false;
+        }
+        if (Input.GetButtonUp("Jump") && isInDoubleJumpWindow && canDoubleJump)
+        {
+            m_VerticalSpeed = initialJumpSpeed;
+            canDoubleJump = false;
+        }
+        if (isGrounded)
+        {
+            canDoubleJump = true;
+        }
+        anim.SetBool("can double jump", isInDoubleJumpWindow);
+
+    }
+
     void CalculateVerticalMovement()
     {
-        if (IsGrounded())
+        bool isGrounded = IsGrounded();
+        ActivateDoubleJump(isGrounded);
+
+        if (isGrounded)
         {
             m_VerticalSpeed = -gravity * Time.deltaTime;
-            if (Input.GetButtonDown("Jump"))
+
+            if (Input.GetButtonUp("Jump"))
             {
                 m_VerticalSpeed = initialJumpSpeed;
-                airborneCurrentHorizontalSpeed = airborneInitialHorizontalSpeed * inputCameraReference.sqrMagnitude;
+                airborneCurrentHorizontalSpeed = airborneInitialHorizontalSpeed * inputCameraReferenceSystem.sqrMagnitude;
             }
         }
         else
         {
-            if (!Input.GetButtonDown("Jump") && m_VerticalSpeed > 0.0f)
-            {
-                // This is what causes holding jump to jump higher that tapping jump.
-                m_VerticalSpeed -= gravity * Time.deltaTime;
-            }
-
+            m_VerticalSpeed -= gravity * Time.deltaTime;
             // If a jump is approximately peaking, make it absolute.
             if (Mathf.Approximately(m_VerticalSpeed, 0f))
             {
                 m_VerticalSpeed = 0f;
             }
-            m_VerticalSpeed -= gravity * Time.deltaTime;
             airborneCurrentHorizontalSpeed -= airborneHorizontalDrag * Time.deltaTime;
-            if(airborneCurrentHorizontalSpeed < 0f)
+            if (airborneCurrentHorizontalSpeed < 0f)
             {
                 airborneCurrentHorizontalSpeed = 0;
             }
         }
         anim.SetFloat("jump speed", m_VerticalSpeed);
-        airborneMovement = m_VerticalSpeed * Vector3.up * Time.deltaTime + inputCameraReference * Time.deltaTime * airborneCurrentHorizontalSpeed;
+        airborneMovement = m_VerticalSpeed * Vector3.up * Time.deltaTime + inputCameraReferenceSystem * Time.deltaTime * airborneCurrentHorizontalSpeed;
         characterController.Move(airborneMovement);
     }
 
@@ -201,7 +224,12 @@ public class HumanController : MonoBehaviour
 
     float GetDotProductVelocityInputDirection()
     {
-        return Vector3.Dot(GetInputWithCameraAsReferenceCoordinates(), transform.forward);
+        return Vector3.Dot(CalculateInputWithCameraAsReferenceSystem(), transform.forward);
+    }
+
+    public Vector3 GetInputInCameraCoordinates()
+    {
+        return inputCameraReferenceSystem;
     }
 
 }

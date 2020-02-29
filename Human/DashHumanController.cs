@@ -17,6 +17,8 @@ public class DashHumanController : MonoBehaviour
     private float dashCurrentTime;
     [Range(0, 10)]
     public float dashSpeed;
+    public string dashButton = "Dash";
+    private Vector3 dashDirection = new Vector3();
 
     void Start()
     {
@@ -27,38 +29,52 @@ public class DashHumanController : MonoBehaviour
 
     void Update()
     {
-        dashInput = Input.GetButtonDown("");
-
+        dashInput = Input.GetButtonDown(dashButton);
+        Debug.Log(dashInput);
         TriggerDashAnimState();
         DashClock();
     }
 
-    void LateUpdate() {
+    void LateUpdate()
+    {
         HorizontalMovement();
     }
 
     void HorizontalMovement()
     {
-        Vector3 m = baseHumanController.GetInputInCameraCoordinates() * Time.deltaTime * dashSpeed;
-        characterController.Move(m);
+        if (isInDash)
+        {
+            Vector3 m = dashDirection * Time.deltaTime * dashSpeed;
+            characterController.Move(m);
+        }
+
+    }
+
+    void SteerToInputDirection(Vector3 inputDirection)
+    {
+        Quaternion rotation = Quaternion.LookRotation(inputDirection, Vector3.up);
+        transform.rotation = rotation;
     }
 
     void TriggerDashAnimState()
     {
-        if(dashInput)
+        if (dashInput && !isInDash)
         {
             isInDash = true;
             anim.SetBool("dash", isInDash);
             dashCurrentTime = dashMaxTime;
+            baseHumanController.shouldSteer = false;
+            dashDirection = baseHumanController.GetInputInCameraCoordinates();
+            SteerToInputDirection(dashDirection);
         }
     }
 
     void DashClock()
     {
-        if(isInDash)
+        if (isInDash)
         {
             dashCurrentTime -= Time.deltaTime;
-            if(dashCurrentTime < 0f)
+            if (dashCurrentTime < 0f)
             {
                 dashCurrentTime = 0f;
                 StopDashing();
@@ -70,5 +86,6 @@ public class DashHumanController : MonoBehaviour
     {
         isInDash = false;
         anim.SetBool("dash", isInDash);
+        baseHumanController.shouldSteer = true;
     }
 }

@@ -22,11 +22,9 @@ public class BaseHumanController : MonoBehaviour
     public string locomotionJumpStateName = "Locomotion jump";
     public string fallingStateName = "Falling";
     private float angle = 0f;
-    public bool debugGrounded = false;
-    public AnimationCurve jumpCurve;
     public float initialJumpSpeed = 10f;
     public float gravity = 10f;
-    public float m_VerticalSpeed = 0f;
+    public float currentVerticalSpeed = 0f;
     private Vector3 airborneMovement;
     private float airborneCurrentHorizontalSpeed = 0f;
     [Range(0, 10)]
@@ -35,13 +33,8 @@ public class BaseHumanController : MonoBehaviour
     public float airborneHorizontalDrag;
     private bool isInDoubleJumpWindow = false;
     private bool canDoubleJump = true;
-
-
-
     [Tooltip("Capa de los objetos donde se puede ajustar el pie")]
     public LayerMask rayMask;
-
-    private int randomIdleState = 0;
 
     void Start()
     {
@@ -65,12 +58,6 @@ public class BaseHumanController : MonoBehaviour
         Debug.DrawRay(transform.position, inputWorldCoordinates * 10, Color.green);
         Debug.DrawRay(transform.position, inputCameraReferenceSystem * 10, Color.blue);
         Debug.DrawRay(transform.position, movementAxis.forward * 10, Color.yellow);
-
-        randomIdleState = Random.Range(0, 10);
-        anim.SetInteger("random idle", randomIdleState);
-
-        // Jump();
-        // Falling();
     }
 
     void LateUpdate()
@@ -146,7 +133,7 @@ public class BaseHumanController : MonoBehaviour
 
     void ActivateDoubleJump(bool isGrounded)
     {
-        if (m_VerticalSpeed < 0f)
+        if (currentVerticalSpeed < 0f)
         {
             isInDoubleJumpWindow = true;
         }
@@ -156,7 +143,7 @@ public class BaseHumanController : MonoBehaviour
         }
         if (Input.GetButtonUp("Jump") && isInDoubleJumpWindow && canDoubleJump)
         {
-            m_VerticalSpeed = initialJumpSpeed;
+            currentVerticalSpeed = initialJumpSpeed;
             canDoubleJump = false;
         }
         if (isGrounded)
@@ -174,21 +161,21 @@ public class BaseHumanController : MonoBehaviour
 
         if (isGrounded)
         {
-            m_VerticalSpeed = -gravity * Time.deltaTime;
+            currentVerticalSpeed = -gravity * Time.deltaTime;
 
             if (Input.GetButtonUp("Jump"))
             {
-                m_VerticalSpeed = initialJumpSpeed;
+                currentVerticalSpeed = initialJumpSpeed;
                 airborneCurrentHorizontalSpeed = airborneInitialHorizontalSpeed * inputCameraReferenceSystem.sqrMagnitude;
             }
         }
         else
         {
-            m_VerticalSpeed -= gravity * Time.deltaTime;
+            currentVerticalSpeed -= gravity * Time.deltaTime;
             // If a jump is approximately peaking, make it absolute.
-            if (Mathf.Approximately(m_VerticalSpeed, 0f))
+            if (Mathf.Approximately(currentVerticalSpeed, 0f))
             {
-                m_VerticalSpeed = 0f;
+                currentVerticalSpeed = 0f;
             }
             airborneCurrentHorizontalSpeed -= airborneHorizontalDrag * Time.deltaTime;
             if (airborneCurrentHorizontalSpeed < 0f)
@@ -196,8 +183,8 @@ public class BaseHumanController : MonoBehaviour
                 airborneCurrentHorizontalSpeed = 0;
             }
         }
-        anim.SetFloat("jump speed", m_VerticalSpeed);
-        airborneMovement = m_VerticalSpeed * Vector3.up * Time.deltaTime + inputCameraReferenceSystem * Time.deltaTime * airborneCurrentHorizontalSpeed;
+        anim.SetFloat("jump speed", currentVerticalSpeed);
+        airborneMovement = currentVerticalSpeed * Vector3.up * Time.deltaTime + inputCameraReferenceSystem * Time.deltaTime * airborneCurrentHorizontalSpeed;
         characterController.Move(airborneMovement);
     }
 

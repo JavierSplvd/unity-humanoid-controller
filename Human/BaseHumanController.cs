@@ -62,13 +62,19 @@ public class BaseHumanController : MonoBehaviour
 
     void LateUpdate()
     {
-        CalculateVerticalMovement();
+        // CalculateVerticalMovement();
 
         Steer();
     }
 
     void Steer()
     {
+
+       AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
+        if (state.IsName("Idle") || state.IsName("Locomotion"))
+        {
+            shouldSteer = true;
+        }
         if (!shouldSteer)
         {
             return;

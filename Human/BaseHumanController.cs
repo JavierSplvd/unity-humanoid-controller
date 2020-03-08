@@ -62,7 +62,7 @@ public class BaseHumanController : MonoBehaviour
 
     void LateUpdate()
     {
-        // CalculateVerticalMovement();
+        CalculateVerticalMovement();
 
         Steer();
     }
@@ -131,8 +131,14 @@ public class BaseHumanController : MonoBehaviour
     {
         Vector3 bottomPositionWithOffset = new Vector3(transform.position.x, transform.position.y + distToGround, transform.position.z);
 
-        bool isGrounded = Physics.Raycast(bottomPositionWithOffset, -Vector3.up, distToGround * 2f, rayMask);
+        bool centerRayHit = Physics.Raycast(bottomPositionWithOffset, -Vector3.up, distToGround * 2f, rayMask);
+        bool frontRayHit = Physics.Raycast(bottomPositionWithOffset + transform.forward * characterController.radius, -Vector3.up, distToGround * 2f, rayMask);
+        bool backRayHit = Physics.Raycast(bottomPositionWithOffset + transform.forward * - characterController.radius, -Vector3.up, distToGround * 2f, rayMask);
+        bool isGrounded = centerRayHit || frontRayHit || backRayHit;
         anim.SetBool("grounded", isGrounded);
+        Debug.DrawRay(bottomPositionWithOffset, -Vector3.up * 2f * distToGround, Color.green);
+        Debug.DrawRay(bottomPositionWithOffset + transform.forward * characterController.radius, -Vector3.up * 2f * distToGround, Color.green);
+        Debug.DrawRay(bottomPositionWithOffset + transform.forward * -characterController.radius, -Vector3.up * 2f * distToGround, Color.green);
         Debug.DrawRay(bottomPositionWithOffset, -Vector3.up * 2f * distToGround, Color.green);
         return isGrounded;
     }
@@ -163,17 +169,17 @@ public class BaseHumanController : MonoBehaviour
     void CalculateVerticalMovement()
     {
         bool isGrounded = IsGrounded();
-        ActivateDoubleJump(isGrounded);
+        // ActivateDoubleJump(isGrounded);
 
         if (isGrounded)
         {
             currentVerticalSpeed = -gravity * Time.deltaTime;
 
-            if (Input.GetButtonUp("Jump"))
-            {
-                currentVerticalSpeed = initialJumpSpeed;
-                airborneCurrentHorizontalSpeed = airborneInitialHorizontalSpeed * inputCameraReferenceSystem.sqrMagnitude;
-            }
+            // if (Input.GetButtonUp("Jump"))
+            // {
+            //     currentVerticalSpeed = initialJumpSpeed;
+            //     airborneCurrentHorizontalSpeed = airborneInitialHorizontalSpeed * inputCameraReferenceSystem.sqrMagnitude;
+            // }
         }
         else
         {
@@ -183,14 +189,15 @@ public class BaseHumanController : MonoBehaviour
             {
                 currentVerticalSpeed = 0f;
             }
-            airborneCurrentHorizontalSpeed -= airborneHorizontalDrag * Time.deltaTime;
-            if (airborneCurrentHorizontalSpeed < 0f)
-            {
-                airborneCurrentHorizontalSpeed = 0;
-            }
+            // airborneCurrentHorizontalSpeed -= airborneHorizontalDrag * Time.deltaTime;
+            // if (airborneCurrentHorizontalSpeed < 0f)
+            // {
+            //     airborneCurrentHorizontalSpeed = 0;
+            // }
         }
         anim.SetFloat("jump speed", currentVerticalSpeed);
-        airborneMovement = currentVerticalSpeed * Vector3.up * Time.deltaTime + inputCameraReferenceSystem * Time.deltaTime * airborneCurrentHorizontalSpeed;
+        // airborneMovement = currentVerticalSpeed * Vector3.up * Time.deltaTime + inputCameraReferenceSystem * Time.deltaTime * airborneCurrentHorizontalSpeed;
+        airborneMovement = currentVerticalSpeed * Vector3.up * Time.deltaTime;
         characterController.Move(airborneMovement);
     }
 

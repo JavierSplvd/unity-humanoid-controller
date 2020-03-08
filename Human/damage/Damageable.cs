@@ -17,5 +17,10 @@ public class Damageable : MonoBehaviour
 
     }
 
+    public void Damage()
+    {
+        
+    }
+
 
 }

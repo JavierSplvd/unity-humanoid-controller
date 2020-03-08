@@ -56,7 +56,7 @@ public class AttackController : MonoBehaviour
         if(currentCommand != null) {
             currentCommand.Execute(gameObject);
         }
-
+        
         AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
         if (state.IsName(attackStateName) || state.IsName(thrustAttackStateName))
         {

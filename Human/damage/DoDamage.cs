@@ -17,16 +17,14 @@ public class DoDamage : MonoBehaviour
 
     }
 
-    void OnCollisionEnter(Collision collision)
+    void OnTriggerEnter(Collider other)
     {
-        foreach (ContactPoint contact in collision.contacts)
+
+        if(other.gameObject.GetComponent<Damageable>() != null)
         {
-            Debug.DrawRay(contact.point, contact.normal, Color.white);
-            if(contact.otherCollider.gameObject.GetComponent<Damageable>() != null)
-            {
-                Debug.Log("DAMAGE");
-            }
+            other.gameObject.GetComponent<Damageable>().Damage();
         }
+
 
     }
 

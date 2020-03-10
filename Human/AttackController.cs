@@ -60,16 +60,12 @@ public class AttackController : MonoBehaviour
         AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
         if (state.IsName(attackStateName) || state.IsName(thrustAttackStateName))
         {
-            sword.transform.parent = hand.transform;
-            sword.transform.position = hand.transform.position;
-            sword.transform.rotation = hand.transform.rotation;
+            sword.GetComponent<SwordController>().SetCommand(new GoToHandCommand(hand.transform));
             baseHumanController.shouldSteer = false;
         }
         else
         {
-            sword.transform.parent = swordOriginalParent;
-            sword.transform.position = swordOriginalParent.position;
-            sword.transform.rotation = Quaternion.identity;
+            
         }
 
         if (!state.IsName(attackStateName) || !state.IsName(thrustAttackStateName) || !state.IsName(kickAttackStateName))

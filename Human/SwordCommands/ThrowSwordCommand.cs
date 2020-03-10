@@ -9,7 +9,7 @@ public class ThrowSwordCommand : Command
     private Animator anim;
     private float speed;
 
-    public ThrowSwordCommand(Vector3 direction)
+    public ThrowSwordCommand(Vector3 direction, float speed)
     {
         this.direction = direction;
         this.speed = speed;

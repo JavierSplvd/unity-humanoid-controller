@@ -14,7 +14,6 @@ public class AttackController : MonoBehaviour
     public Transform joystickDirection;
 
     public GameObject sword;
-    private Transform swordOriginalParent;
     public GameObject hand;
 
     public string attackAnimTrigger = "attack";
@@ -36,7 +35,6 @@ public class AttackController : MonoBehaviour
         anim = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
         baseHumanController = GetComponent<BaseHumanController>();
-        swordOriginalParent = sword.transform.parent;
     }
 
     // Update is called once per frame
@@ -66,6 +64,11 @@ public class AttackController : MonoBehaviour
         else
         {
             
+        }
+        
+        if(state.IsName(attackStateName) && anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.5f)
+        {
+            sword.GetComponent<SwordController>().Throw(joystickDirection.forward);
         }
 
         if (!state.IsName(attackStateName) || !state.IsName(thrustAttackStateName) || !state.IsName(kickAttackStateName))

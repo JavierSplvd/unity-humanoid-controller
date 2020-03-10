@@ -71,7 +71,6 @@ public class Jiggle : MonoBehaviour
         // transform.localRotation = new Quaternion (boneAxis.x, boneAxis.y, boneAxis.z, 0.0f);
         if(transform.right.y < 0)
         {
-            Debug.Log(transform.right);
             transform.Rotate(new Vector3(0,0,180));
         }
  

@@ -18,7 +18,7 @@ public class GoToHandCommand : Command
     {
         gameObject.transform.parent = hand;
         gameObject.transform.position = hand.transform.position;
-        gameObject.transform.rotation = hand.transform.rotation;
+        // gameObject.transform.rotation = hand.transform.rotation;
     }
 
 }

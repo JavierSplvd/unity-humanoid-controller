@@ -14,7 +14,6 @@ public class SwordController : MonoBehaviour
 
     }
     private void Update() {
-        Debug.Log(command);
         if(command != null)
         {
             command.Execute(gameObject);

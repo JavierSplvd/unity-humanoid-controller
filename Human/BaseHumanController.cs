@@ -21,6 +21,7 @@ public class BaseHumanController : MonoBehaviour
     public string idleJumpStateName = "Idle jump";
     public string locomotionJumpStateName = "Locomotion jump";
     public string fallingStateName = "Falling";
+    public string jumpStateName = "Jump";
     private float angle = 0f;
     public float initialJumpSpeed = 10f;
     public float gravity = 10f;
@@ -51,13 +52,16 @@ public class BaseHumanController : MonoBehaviour
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
         inputWorldCoordinates = GetInputInWorldCoordinates(h, v);
-        inputCameraReferenceSystem = CalculateInputWithCameraAsReferenceSystem();
+        inputCameraReferenceSystem = CalculateInputWithCameraAsReferenceSystem();    
         anim.SetFloat("forward", inputCameraReferenceSystem.magnitude);
         angle = Vector3.Angle(inputCameraReferenceSystem, transform.forward);
         anim.SetFloat("direction", angle);
         Debug.DrawRay(transform.position, inputWorldCoordinates * 10, Color.green);
         Debug.DrawRay(transform.position, inputCameraReferenceSystem * 10, Color.blue);
         Debug.DrawRay(transform.position, movementAxis.forward * 10, Color.yellow);
+
+        TriggerJump();
+        ReduceCapsuleHeightWhileJumping();
     }
 
     void LateUpdate()
@@ -104,7 +108,31 @@ public class BaseHumanController : MonoBehaviour
         else
         {
             anim.applyRootMotion = true;
+        }
+    }
 
+    void TriggerJump()
+    {
+        if(Input.GetAxis("Jump") > 0)
+        {
+            Debug.Log("jump!");
+            anim.SetTrigger("jump");
+        }
+        else{
+            anim.ResetTrigger("jump");
+        }
+    }
+
+    void ReduceCapsuleHeightWhileJumping()
+    {
+        AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
+        if (state.IsName(jumpStateName))
+        {
+            characterController.height = characterController.center.y;
+        }
+        else
+        {
+            characterController.height = characterController.center.y * 2;
         }
     }
 

@@ -8,12 +8,15 @@ public class SwordController : MonoBehaviour
     private Command command;
     private Transform swordOriginalParent;
     public float speed;
+    private Vector3 positionWhereWasThrown;
+    public float maxDistance;
 
     private void Start() {
         swordOriginalParent = gameObject.transform.parent;
-
+        positionWhereWasThrown = transform.position;
     }
     private void Update() {
+        Debug.Log(command);
         if(command != null)
         {
             command.Execute(gameObject);
@@ -27,8 +30,14 @@ public class SwordController : MonoBehaviour
 
     public void Throw(Vector3 direction)
     {
+        positionWhereWasThrown = transform.position;
         transform.rotation = Quaternion.LookRotation(direction);
         transform.parent = swordOriginalParent;
-        command = new ThrowSwordCommand(direction, speed);
+        command = new ThrowSwordCommand(new Vector3(direction.x, direction.y, direction.z), speed, positionWhereWasThrown, maxDistance);
+    }
+
+    public void ReturnToPlayer(Transform objectToReturn)
+    {
+        command = new ReturnToThePlayer(objectToReturn, speed);
     }
 }

@@ -3,9 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(CharacterController))]
-[RequireComponent(typeof(BaseHumanController))]
 public class HumanAttackCommand : Command
 {
     public string attackAnimTrigger = "attack";

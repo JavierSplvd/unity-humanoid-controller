@@ -16,17 +16,17 @@ public class AttackController : MonoBehaviour
     public GameObject sword;
     public GameObject hand;
 
-    public string attackAnimTrigger = "attack";
-    public string attackButton = "Fire1";
-    public string attackStateName = "Attack";
+    public string primaryAttackAnimTrigger = "attack";
+    public string primaryAttackButton = "Fire1";
+    public string primaryAttackStateName = "Attack";
 
-    public string thrustAttackAnimTrigger = "thrust attack";
-    public string thrustAttackButton = "Fire2";
-    public string thrustAttackStateName = "Thrust Attack";
+    public string secondaryAttackAnimTrigger = "thrust attack";
+    public string secondaryAttackButton = "Fire2";
+    public string secondaryAttackStateName = "Thrust Attack";
 
-    public string kickAttackAnimTrigger = "kick attack";
-    public string kickAttackButton = "Fire3";
-    public string kickAttackStateName = "Kick Attack";
+    public string terciaryAttackAnimTrigger = "kick attack";
+    public string terciaryAttackButton = "Fire3";
+    public string terciaryAttackStateName = "Kick Attack";
     
     private Command currentCommand;
     // Start is called before the first frame update
@@ -38,17 +38,22 @@ public class AttackController : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
-        if(Input.GetButtonDown(attackButton))
+        ResetTriggers();
+        if(Input.GetButtonDown(primaryAttackButton) && sword.transform.parent.Equals(hand.transform))
         {
-            currentCommand = new HumanAttackCommand(attackAnimTrigger, attackButton, joystickDirection.forward);
-        } else if(Input.GetButtonDown(thrustAttackButton))
+            currentCommand = new HumanAttackCommand(primaryAttackAnimTrigger, primaryAttackButton, joystickDirection.forward);
+        } else if(Input.GetButtonDown(primaryAttackButton))
         {
-            currentCommand = new HumanAttackCommand(thrustAttackAnimTrigger, thrustAttackButton, joystickDirection.forward);
-        } else if(Input.GetButtonDown(kickAttackButton))
+            // anim???
+            sword.GetComponent<SwordController>().ReturnToPlayer(hand.transform);        
+        } else if(Input.GetButtonDown(secondaryAttackButton))
         {
-            currentCommand = new HumanAttackCommand(kickAttackAnimTrigger, kickAttackButton, joystickDirection.forward);
+            currentCommand = new TeleportCommand(secondaryAttackAnimTrigger, sword.transform.position);
+        } else if(Input.GetButtonDown(terciaryAttackButton))
+        {
+            currentCommand = new HumanAttackCommand(terciaryAttackAnimTrigger, terciaryAttackButton, joystickDirection.forward);
         }
 
         if(currentCommand != null) {
@@ -56,7 +61,7 @@ public class AttackController : MonoBehaviour
         }
         
         AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
-        if (state.IsName(attackStateName) || state.IsName(thrustAttackStateName))
+        if (state.IsName(primaryAttackStateName))
         {
             sword.GetComponent<SwordController>().SetCommand(new GoToHandCommand(hand.transform));
             baseHumanController.shouldSteer = false;
@@ -66,19 +71,22 @@ public class AttackController : MonoBehaviour
             
         }
         
-        if(state.IsName(attackStateName) && anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.5f)
+        if(state.IsName(primaryAttackStateName) && anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.3f)
         {
             sword.GetComponent<SwordController>().Throw(joystickDirection.forward);
         }
 
-        if (!state.IsName(attackStateName) || !state.IsName(thrustAttackStateName) || !state.IsName(kickAttackStateName))
+        if (!state.IsName(primaryAttackStateName) || !state.IsName(secondaryAttackStateName) || !state.IsName(terciaryAttackStateName))
         {
             currentCommand = null;
         }
     }
 
-    private void LateUpdate()
+    private void ResetTriggers()
     {
+        anim.ResetTrigger(primaryAttackAnimTrigger);
+        anim.ResetTrigger(secondaryAttackAnimTrigger);
+        anim.ResetTrigger(terciaryAttackAnimTrigger);
     }
 
 }

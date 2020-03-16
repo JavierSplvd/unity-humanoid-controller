@@ -16,7 +16,6 @@ public class SwordController : MonoBehaviour
         positionWhereWasThrown = transform.position;
     }
     private void Update() {
-        Debug.Log(command);
         if(command != null)
         {
             command.Execute(gameObject);

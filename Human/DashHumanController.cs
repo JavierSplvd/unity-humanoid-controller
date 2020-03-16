@@ -30,7 +30,6 @@ public class DashHumanController : MonoBehaviour
     void Update()
     {
         dashInput = Input.GetButtonDown(dashButton);
-        Debug.Log(dashInput);
         TriggerDashAnimState();
         DashClock();
     }

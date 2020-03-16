@@ -37,6 +37,9 @@ public class BaseHumanController : MonoBehaviour
     [Tooltip("Capa de los objetos donde se puede ajustar el pie")]
     public LayerMask rayMask;
 
+    private float maxCapsuleHeight;
+    private float currentCapsuleHeight;
+
     void Start()
     {
         anim = GetComponent<Animator>();
@@ -44,6 +47,8 @@ public class BaseHumanController : MonoBehaviour
         inputWorldCoordinates = new Vector3();
         inputCameraReferenceSystem = new Vector3();
         airborneMovement = new Vector3(0, 0, 0);
+        maxCapsuleHeight = characterController.height;
+        currentCapsuleHeight = maxCapsuleHeight;
     }
 
     // Update is called once per frame
@@ -52,7 +57,7 @@ public class BaseHumanController : MonoBehaviour
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
         inputWorldCoordinates = GetInputInWorldCoordinates(h, v);
-        inputCameraReferenceSystem = CalculateInputWithCameraAsReferenceSystem();    
+        inputCameraReferenceSystem = CalculateInputWithCameraAsReferenceSystem();
         anim.SetFloat("forward", inputCameraReferenceSystem.magnitude);
         angle = Vector3.Angle(inputCameraReferenceSystem, transform.forward);
         anim.SetFloat("direction", angle);
@@ -74,7 +79,7 @@ public class BaseHumanController : MonoBehaviour
     void Steer()
     {
 
-       AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
+        AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
         if (state.IsName("Idle") || state.IsName("Locomotion"))
         {
             shouldSteer = true;
@@ -113,12 +118,13 @@ public class BaseHumanController : MonoBehaviour
 
     void TriggerJump()
     {
-        if(Input.GetAxis("Jump") > 0)
+        if (Input.GetAxis("Jump") > 0)
         {
             Debug.Log("jump!");
             anim.SetTrigger("jump");
         }
-        else{
+        else
+        {
             anim.ResetTrigger("jump");
         }
     }
@@ -126,13 +132,14 @@ public class BaseHumanController : MonoBehaviour
     void ReduceCapsuleHeightWhileJumping()
     {
         AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
-        if (state.IsName(jumpStateName))
+        if (state.IsName(jumpStateName) && state.normalizedTime < 0.1f)
         {
-            characterController.height = characterController.center.y;
+            currentVerticalSpeed = initialJumpSpeed;
+            characterController.height = maxCapsuleHeight * 0.8f;
         }
         else
         {
-            characterController.height = characterController.center.y * 2;
+            characterController.height = Mathf.Clamp(characterController.height + 0.2f, 0, maxCapsuleHeight);
         }
     }
 
@@ -157,47 +164,29 @@ public class BaseHumanController : MonoBehaviour
 
     public bool IsGrounded()
     {
-        Vector3 bottomPositionWithOffset = new Vector3(transform.position.x, transform.position.y + distToGround, transform.position.z);
+        Vector3 bottomPositionWithOffset = new Vector3(transform.position.x, transform.position.y + characterController.center.y - characterController.height / 2 + distToGround, transform.position.z);
 
         bool centerRayHit = Physics.Raycast(bottomPositionWithOffset, -Vector3.up, distToGround * 2f, rayMask);
         bool frontRayHit = Physics.Raycast(bottomPositionWithOffset + transform.forward * characterController.radius, -Vector3.up, distToGround * 2f, rayMask);
-        bool backRayHit = Physics.Raycast(bottomPositionWithOffset + transform.forward * - characterController.radius, -Vector3.up, distToGround * 2f, rayMask);
-        bool isGrounded = centerRayHit || frontRayHit || backRayHit;
+        bool backRayHit = Physics.Raycast(bottomPositionWithOffset + transform.forward * -characterController.radius, -Vector3.up, distToGround * 2f, rayMask);
+        bool rightRayHit = Physics.Raycast(bottomPositionWithOffset + transform.right * characterController.radius, -Vector3.up, distToGround * 2f, rayMask);
+        bool leftRayHit = Physics.Raycast(bottomPositionWithOffset + transform.right * -characterController.radius, -Vector3.up, distToGround * 2f, rayMask);
+
+
+        bool isGrounded = centerRayHit || frontRayHit || backRayHit || rightRayHit || leftRayHit;
         anim.SetBool("grounded", isGrounded);
         Debug.DrawRay(bottomPositionWithOffset, -Vector3.up * 2f * distToGround, Color.green);
         Debug.DrawRay(bottomPositionWithOffset + transform.forward * characterController.radius, -Vector3.up * 2f * distToGround, Color.green);
         Debug.DrawRay(bottomPositionWithOffset + transform.forward * -characterController.radius, -Vector3.up * 2f * distToGround, Color.green);
+        Debug.DrawRay(bottomPositionWithOffset + transform.right * characterController.radius, -Vector3.up * 2f * distToGround, Color.green);
+        Debug.DrawRay(bottomPositionWithOffset + transform.right * -characterController.radius, -Vector3.up * 2f * distToGround, Color.green);
         Debug.DrawRay(bottomPositionWithOffset, -Vector3.up * 2f * distToGround, Color.green);
         return isGrounded;
-    }
-
-    void ActivateDoubleJump(bool isGrounded)
-    {
-        if (currentVerticalSpeed < 0f)
-        {
-            isInDoubleJumpWindow = true;
-        }
-        else
-        {
-            isInDoubleJumpWindow = false;
-        }
-        if (Input.GetButtonUp("Jump") && isInDoubleJumpWindow && canDoubleJump)
-        {
-            currentVerticalSpeed = initialJumpSpeed;
-            canDoubleJump = false;
-        }
-        if (isGrounded)
-        {
-            canDoubleJump = true;
-        }
-        anim.SetBool("can double jump", isInDoubleJumpWindow);
-
     }
 
     void CalculateVerticalMovement()
     {
         bool isGrounded = IsGrounded();
-        // ActivateDoubleJump(isGrounded);
 
         if (isGrounded)
         {

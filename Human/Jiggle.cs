@@ -14,6 +14,7 @@ public class Jiggle : MonoBehaviour
 	// Bone settings
 	public Vector3 boneAxis = new Vector3(0,0,1);
 	public float targetDistance = 2.0f;
+	public float maxDistancePercentage = 0.1f;
  
 	// Dynamics settings
 	public float bStiffness = 0.1f;
@@ -46,7 +47,7 @@ public class Jiggle : MonoBehaviour
 		Vector3 upVector = transform.TransformDirection(new Vector3(0,1,0));
  
 		// Calculate target position
-		Vector3 targetPos = transform.position + transform.TransformDirection(new Vector3((boneAxis.x * targetDistance),(boneAxis.y * targetDistance),(boneAxis.z * targetDistance)));
+		targetPos = transform.position + transform.TransformDirection(new Vector3((boneAxis.x * targetDistance),(boneAxis.y * targetDistance),(boneAxis.z * targetDistance)));
  
 		// Calculate force, acceleration, and velocity per X, Y and Z
 		force.x = (targetPos.x - dynamicPos.x) * bStiffness;
@@ -64,10 +65,19 @@ public class Jiggle : MonoBehaviour
  
 		// Update dynamic postion
 		dynamicPos += vel + force;
+
+		Vector3 dynamicPosSanitized = dynamicPos;
+		if(Vector3.Distance(dynamicPos, forwardVector + transform.position) > targetDistance * maxDistancePercentage)
+		{
+			Debug.Log("!");
+			dynamicPosSanitized = forwardVector + transform.position + (- forwardVector - transform.position + dynamicPos).normalized * targetDistance * maxDistancePercentage;
+		}
+
+
  
 		// Set bone rotation to look at dynamicPos
 		// transform.LookAt(dynamicPos, upVector);
-        transform.LookAt(dynamicPos, Vector3.right);
+        transform.LookAt(dynamicPosSanitized, Vector3.right);
         // transform.localRotation = new Quaternion (boneAxis.x, boneAxis.y, boneAxis.z, 0.0f);
         if(transform.right.y < 0)
         {
@@ -119,6 +129,7 @@ public class Jiggle : MonoBehaviour
 			Debug.DrawRay(transform.position, upVector, Color.green);
 			Debug.DrawRay(targetPos, Vector3.up * 0.2f, Color.yellow);
 			Debug.DrawRay(dynamicPos, Vector3.up * 0.2f, Color.red);
+			Debug.DrawRay(dynamicPosSanitized, Vector3.up * 0.2f, Color.magenta);
 		}
 		// ==================================================
 	}

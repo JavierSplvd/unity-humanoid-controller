@@ -72,18 +72,24 @@ public class Jiggle : MonoBehaviour
 			Debug.Log("!");
 			dynamicPosSanitized = forwardVector + transform.position + (- forwardVector - transform.position + dynamicPos).normalized * targetDistance * maxDistancePercentage;
 		}
+		// dynamicPosSanitized = new Vector3(forwardVector.x + transform.position.x, 
+		// 	dynamicPosSanitized.y, 
+		// 	forwardVector.z + transform.position.z
+		// );
 
 
  
 		// Set bone rotation to look at dynamicPos
 		// transform.LookAt(dynamicPos, upVector);
-        transform.LookAt(dynamicPosSanitized, Vector3.right);
-        // transform.localRotation = new Quaternion (boneAxis.x, boneAxis.y, boneAxis.z, 0.0f);
-        if(transform.right.y < 0)
+        transform.LookAt(dynamicPosSanitized, -Vector3.right);
+		if(transform.right.y < 0)
         {
             transform.Rotate(new Vector3(0,0,180));
         }
- 
+		transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, 90);
+		Debug.Log(transform.rotation.eulerAngles);
+
+        // transform.localRotation = new Quaternion (boneAxis.x, boneAxis.y, boneAxis.z, 0.0f);
 		// ==================================================
 		// Squash and Stretch section
 		// ==================================================

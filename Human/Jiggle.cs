@@ -69,7 +69,6 @@ public class Jiggle : MonoBehaviour
 		Vector3 dynamicPosSanitized = dynamicPos;
 		if(Vector3.Distance(dynamicPos, forwardVector + transform.position) > targetDistance * maxDistancePercentage)
 		{
-			Debug.Log("!");
 			dynamicPosSanitized = forwardVector + transform.position + (- forwardVector - transform.position + dynamicPos).normalized * targetDistance * maxDistancePercentage;
 		}
 		// dynamicPosSanitized = new Vector3(forwardVector.x + transform.position.x, 
@@ -87,7 +86,6 @@ public class Jiggle : MonoBehaviour
             transform.Rotate(new Vector3(0,0,180));
         }
 		transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, 90);
-		Debug.Log(transform.rotation.eulerAngles);
 
         // transform.localRotation = new Quaternion (boneAxis.x, boneAxis.y, boneAxis.z, 0.0f);
 		// ==================================================

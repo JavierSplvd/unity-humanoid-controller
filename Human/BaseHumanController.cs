@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(CharacterController))]
@@ -10,6 +11,7 @@ public class BaseHumanController : MonoBehaviour
     private CharacterController characterController;
     private Vector3 inputWorldCoordinates;
     private Vector3 inputCameraReferenceSystem;
+    private Vector3 lastInputCameraReferenceSystem;
     public Transform movementAxis;
     public float distToGround = 0.1f;
     public float singleStep = 1f;
@@ -40,12 +42,15 @@ public class BaseHumanController : MonoBehaviour
     private float maxCapsuleHeight;
     private float currentCapsuleHeight;
 
+    private Gamepad gamepad;
     void Start()
     {
+        gamepad = Gamepad.current;
         anim = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
         inputWorldCoordinates = new Vector3();
         inputCameraReferenceSystem = new Vector3();
+        lastInputCameraReferenceSystem = new Vector3();
         airborneMovement = new Vector3(0, 0, 0);
         maxCapsuleHeight = characterController.height;
         currentCapsuleHeight = maxCapsuleHeight;
@@ -58,6 +63,7 @@ public class BaseHumanController : MonoBehaviour
         float v = Input.GetAxis("Vertical");
         inputWorldCoordinates = GetInputInWorldCoordinates(h, v);
         inputCameraReferenceSystem = CalculateInputWithCameraAsReferenceSystem();
+        inputCameraReferenceSystem = 0.4f * inputCameraReferenceSystem + 0.6f * lastInputCameraReferenceSystem;
         anim.SetFloat("forward", inputCameraReferenceSystem.magnitude);
         angle = Vector3.Angle(inputCameraReferenceSystem, transform.forward);
         anim.SetFloat("direction", angle);
@@ -67,6 +73,8 @@ public class BaseHumanController : MonoBehaviour
 
         TriggerJump();
         ReduceCapsuleHeightWhileJumping();
+
+        lastInputCameraReferenceSystem = new Vector3(inputCameraReferenceSystem.x, inputCameraReferenceSystem.y, inputCameraReferenceSystem.z);
     }
 
     void LateUpdate()
@@ -166,7 +174,7 @@ public class BaseHumanController : MonoBehaviour
     {
         Vector3 bottomPositionWithOffset = new Vector3(transform.position.x, transform.position.y + characterController.center.y - characterController.height / 2 + distToGround, transform.position.z);
 
-        bool centerRayHit = Physics.Raycast(bottomPositionWithOffset, -Vector3.up, distToGround * 2f, rayMask);
+        bool centerRayHit = Physics.Raycast(bottomPositionWithOffset, -Vector3.up, distToGround * 3f, rayMask);
         bool frontRayHit = Physics.Raycast(bottomPositionWithOffset + transform.forward * characterController.radius, -Vector3.up, distToGround * 2f, rayMask);
         bool backRayHit = Physics.Raycast(bottomPositionWithOffset + transform.forward * -characterController.radius, -Vector3.up, distToGround * 2f, rayMask);
         bool rightRayHit = Physics.Raycast(bottomPositionWithOffset + transform.right * characterController.radius, -Vector3.up, distToGround * 2f, rayMask);
@@ -175,7 +183,7 @@ public class BaseHumanController : MonoBehaviour
 
         bool isGrounded = centerRayHit || frontRayHit || backRayHit || rightRayHit || leftRayHit;
         anim.SetBool("grounded", isGrounded);
-        Debug.DrawRay(bottomPositionWithOffset, -Vector3.up * 2f * distToGround, Color.green);
+        Debug.DrawRay(bottomPositionWithOffset, -Vector3.up * 3f * distToGround, Color.green);
         Debug.DrawRay(bottomPositionWithOffset + transform.forward * characterController.radius, -Vector3.up * 2f * distToGround, Color.green);
         Debug.DrawRay(bottomPositionWithOffset + transform.forward * -characterController.radius, -Vector3.up * 2f * distToGround, Color.green);
         Debug.DrawRay(bottomPositionWithOffset + transform.right * characterController.radius, -Vector3.up * 2f * distToGround, Color.green);
@@ -248,5 +256,6 @@ public class BaseHumanController : MonoBehaviour
     {
         return inputCameraReferenceSystem;
     }
+
 
 }

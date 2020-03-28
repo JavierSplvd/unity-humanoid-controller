@@ -4,6 +4,7 @@ public class SteerToTargetCommand : Command
 {
     private GameObject target;
     private float rotationSpeed;
+    
     public SteerToTargetCommand(GameObject target, float rotationSpeed)
     {
         this.target = target;

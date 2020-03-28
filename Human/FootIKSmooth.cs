@@ -23,6 +23,8 @@ public class FootIKSmooth : MonoBehaviour
     [Tooltip("Capa de los objetos donde se puede ajustar el pie")]
     public LayerMask RayMask;
 
+    public string idleAnimatorStateName = "Idle";
+
     void Start()
     {
         anim = GetComponent<Animator>();
@@ -41,7 +43,7 @@ public class FootIKSmooth : MonoBehaviour
 
     void OnAnimatorIK()
     {
-        if(IkActive)
+        if(IkActive && anim.GetCurrentAnimatorStateInfo(0).IsName(idleAnimatorStateName))
         {
 			Vector3 FootPos = anim.GetIKPosition(AvatarIKGoal.RightFoot); //Obtenemos posicion del Pie
             if (Physics.Raycast(FootPos + Vector3.up, Vector3.down, out hit, 1.2f, RayMask)) //Lanzamos raycast hacia abajo

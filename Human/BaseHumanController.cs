@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(CharacterController))]
@@ -34,18 +33,14 @@ public class BaseHumanController : MonoBehaviour
     public float airborneInitialHorizontalSpeed;
     [Range(0, 10)]
     public float airborneHorizontalDrag;
-    private bool isInDoubleJumpWindow = false;
-    private bool canDoubleJump = true;
     [Tooltip("Capa de los objetos donde se puede ajustar el pie")]
     public LayerMask rayMask;
 
     private float maxCapsuleHeight;
     private float currentCapsuleHeight;
 
-    private Gamepad gamepad;
     void Start()
     {
-        gamepad = Gamepad.current;
         anim = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
         inputWorldCoordinates = new Vector3();
@@ -174,21 +169,21 @@ public class BaseHumanController : MonoBehaviour
     {
         Vector3 bottomPositionWithOffset = new Vector3(transform.position.x, transform.position.y + characterController.center.y - characterController.height / 2 + distToGround, transform.position.z);
 
-        bool centerRayHit = Physics.Raycast(bottomPositionWithOffset, -Vector3.up, distToGround * 3f, rayMask);
-        bool frontRayHit = Physics.Raycast(bottomPositionWithOffset + transform.forward * characterController.radius, -Vector3.up, distToGround * 2f, rayMask);
-        bool backRayHit = Physics.Raycast(bottomPositionWithOffset + transform.forward * -characterController.radius, -Vector3.up, distToGround * 2f, rayMask);
-        bool rightRayHit = Physics.Raycast(bottomPositionWithOffset + transform.right * characterController.radius, -Vector3.up, distToGround * 2f, rayMask);
-        bool leftRayHit = Physics.Raycast(bottomPositionWithOffset + transform.right * -characterController.radius, -Vector3.up, distToGround * 2f, rayMask);
+        bool centerRayHit = Physics.Raycast(bottomPositionWithOffset, -Vector3.up, distToGround, rayMask);
+        bool frontRayHit = Physics.Raycast(bottomPositionWithOffset + transform.forward * characterController.radius, -Vector3.up, distToGround * 1.01f, rayMask);
+        bool backRayHit = Physics.Raycast(bottomPositionWithOffset + transform.forward * -characterController.radius, -Vector3.up, distToGround * 1.01f, rayMask);
+        bool rightRayHit = Physics.Raycast(bottomPositionWithOffset + transform.right * characterController.radius, -Vector3.up, distToGround * 1.01f, rayMask);
+        bool leftRayHit = Physics.Raycast(bottomPositionWithOffset + transform.right * -characterController.radius, -Vector3.up, distToGround * 1.01f, rayMask);
 
 
         bool isGrounded = centerRayHit || frontRayHit || backRayHit || rightRayHit || leftRayHit;
         anim.SetBool("grounded", isGrounded);
-        Debug.DrawRay(bottomPositionWithOffset, -Vector3.up * 3f * distToGround, Color.green);
-        Debug.DrawRay(bottomPositionWithOffset + transform.forward * characterController.radius, -Vector3.up * 2f * distToGround, Color.green);
-        Debug.DrawRay(bottomPositionWithOffset + transform.forward * -characterController.radius, -Vector3.up * 2f * distToGround, Color.green);
-        Debug.DrawRay(bottomPositionWithOffset + transform.right * characterController.radius, -Vector3.up * 2f * distToGround, Color.green);
-        Debug.DrawRay(bottomPositionWithOffset + transform.right * -characterController.radius, -Vector3.up * 2f * distToGround, Color.green);
-        Debug.DrawRay(bottomPositionWithOffset, -Vector3.up * 2f * distToGround, Color.green);
+        Debug.DrawRay(bottomPositionWithOffset, -Vector3.up * distToGround, Color.green);
+        Debug.DrawRay(bottomPositionWithOffset + transform.forward * characterController.radius, -Vector3.up * 1.01f * distToGround, Color.green);
+        Debug.DrawRay(bottomPositionWithOffset + transform.forward * -characterController.radius, -Vector3.up * 1.01f * distToGround, Color.green);
+        Debug.DrawRay(bottomPositionWithOffset + transform.right * characterController.radius, -Vector3.up * 1.01f * distToGround, Color.green);
+        Debug.DrawRay(bottomPositionWithOffset + transform.right * -characterController.radius, -Vector3.up * 1.01f * distToGround, Color.green);
+        Debug.DrawRay(bottomPositionWithOffset, -Vector3.up * 1.01f * distToGround, Color.green);
         return isGrounded;
     }
 

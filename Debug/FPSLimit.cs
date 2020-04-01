@@ -13,7 +13,7 @@ public class FPSLimit : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.Log(Application.targetFrameRate);
+        // Debug.Log(Application.targetFrameRate);
     }
 
     void Awake () {

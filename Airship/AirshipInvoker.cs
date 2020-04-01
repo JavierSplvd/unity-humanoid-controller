@@ -24,4 +24,9 @@ public class AirshipInvoker : MonoBehaviour
     {
         commands.Add(c);
     }
+
+    public void Remove(Command c)
+    {
+        commands.Remove(c);
+    }
 }

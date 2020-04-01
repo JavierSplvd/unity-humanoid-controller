@@ -10,9 +10,12 @@ public class AirshipController : MonoBehaviour
 
     public float rotationSpeed;
     public float forwardSpeed;
+    public float swingAmplitude;
+    public float swingAngularVel;
     // Commands
     private Command steerCommand;
     private Command moveForwardCommand;
+    private Command verticalSwingCommand;
     // Start is called before the first frame update
     void Start()
     {
@@ -22,8 +25,10 @@ public class AirshipController : MonoBehaviour
             // Commands
             steerCommand = new SteerToTargetCommand(navMeshAgent, rotationSpeed);
             moveForwardCommand = new MoveForwardSimpleCommand(forwardSpeed);
-            airshipInvoker.Add(steerCommand);
-            airshipInvoker.Add(moveForwardCommand);
+            verticalSwingCommand = new VerticalSwingCommand(swingAmplitude, swingAngularVel);
+            // airshipInvoker.Add(steerCommand);
+            // airshipInvoker.Add(moveForwardCommand);
+            airshipInvoker.Add(verticalSwingCommand);
         }
         else
         {
@@ -35,6 +40,10 @@ public class AirshipController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if(Vector3.Distance(transform.position, navMeshAgent.transform.position) < 2)
+        {
+            airshipInvoker.Remove(steerCommand);
+            airshipInvoker.Remove(moveForwardCommand);
+        }
     }
 }

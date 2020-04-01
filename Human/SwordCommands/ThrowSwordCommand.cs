@@ -17,6 +17,7 @@ public class ThrowSwordCommand : Command
         this.originalPosition = originalPosition;
         this.direction = direction;
         this.speed = speed;
+        this.maxDistance = maxDistance;
     }
 
     // Update is called once per frame

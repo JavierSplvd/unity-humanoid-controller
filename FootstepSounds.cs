@@ -28,7 +28,6 @@ public class FootstepSounds : MonoBehaviour
     bool CheckCollision(Vector3 position)
     {
         bool hit = Physics.Raycast(position - Vector3.up * raycastDistance * 0.8f, - Vector3.up, raycastDistance, rayMask);
-        Debug.Log(hit);
         if(!hit)
         {
             isNewStep = true;

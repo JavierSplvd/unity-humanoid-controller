@@ -19,7 +19,7 @@ public class VerticalSwingCommand : Command
 
     }
 
-    public override void Execute(GameObject gameObject)
+    public override void Execute(GameObject gameObject, float scale = 1f)
     {
         currentDelta = Mathf.Sin(angularVel * Time.time) * amplitude;
         currentDeltaVector.y = currentDelta - previousDelta;

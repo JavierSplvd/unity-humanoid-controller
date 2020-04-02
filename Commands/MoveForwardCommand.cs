@@ -9,7 +9,7 @@ public class MoveForwardCommand : Command
         this.forwardSpeed = forwardSpeed;
     }
 
-    public override void Execute(GameObject gameObject)
+    public override void Execute(GameObject gameObject, float scale = 1f)
     {
         gameObject.GetComponent<CharacterController>().Move(gameObject.transform.forward * forwardSpeed * Time.deltaTime);
 

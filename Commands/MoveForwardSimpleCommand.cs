@@ -10,9 +10,9 @@ public class MoveForwardSimpleCommand : Command
         this.forwardSpeed = forwardSpeed;
     }
 
-    public override void Execute(GameObject gameObject)
+    public override void Execute(GameObject gameObject, float scale = 1f)
     {
-        delta = gameObject.transform.forward * forwardSpeed * Time.deltaTime;
+        delta = gameObject.transform.forward * forwardSpeed * scale * Time.deltaTime;
         gameObject.transform.position += delta;
     }
 }

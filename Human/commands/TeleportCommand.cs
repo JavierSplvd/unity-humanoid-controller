@@ -19,7 +19,7 @@ public class TeleportCommand : Command
     }
 
     // Update is called once per frame
-    public override void Execute(GameObject gameObject)
+    public override void Execute(GameObject gameObject, float scale = 1f)
     {
         if(anim == null) {
             anim = gameObject.GetComponent<Animator>();

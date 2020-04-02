@@ -12,13 +12,13 @@ public class MoveVerticalDirectionCommand : Command
         this.target = target;
     }
 
-    public override void Execute(GameObject gameObject)
+    public override void Execute(GameObject gameObject, float scale = 1f)
     {
         speedVector.y = speed;
         if(gameObject.transform.position.y > target.position.y)
         {
             speedVector = speedVector * -1;
         }
-        gameObject.transform.Translate(speedVector * Time.deltaTime, Space.Self);
+        gameObject.transform.Translate(speedVector * scale * Time.deltaTime, Space.Self);
     }
 }

@@ -1,12 +1,11 @@
 using UnityEngine;
 
-public class MoveTowardsCommand : Command
+public class MoveTowardsSimpleCommand : Command
 {
     private GameObject target;
     private float speed;
     private Vector3 directionToGo;
-    private CharacterController characterController;
-    public MoveTowardsCommand(GameObject target, float speed)
+    public MoveTowardsSimpleCommand(GameObject target, float speed)
     {
         this.target = target;
         this.speed = speed;
@@ -16,7 +15,7 @@ public class MoveTowardsCommand : Command
     public override void Execute(GameObject gameObject, float scale = 1f)
     {
         directionToGo = target.transform.position - gameObject.transform.position;
-        gameObject.GetComponent<CharacterController>().Move(directionToGo.normalized * speed * Time.deltaTime);
+        gameObject.transform.position += directionToGo.normalized * speed * scale * Time.deltaTime;
     }
 
 }

@@ -14,7 +14,7 @@ public class GoToHandCommand : Command
     }
 
     // Update is called once per frame
-    public override void Execute(GameObject gameObject)
+    public override void Execute(GameObject gameObject, float scale = 1f)
     {
         gameObject.transform.parent = hand;
         gameObject.transform.position = hand.transform.position;

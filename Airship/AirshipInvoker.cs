@@ -5,6 +5,7 @@ using UnityEngine;
 public class AirshipInvoker : MonoBehaviour
 {
     private List<Command> commands = new List<Command>();
+    public float scale = 1f;
     // Start is called before the first frame update
     void Start()
     {
@@ -16,7 +17,7 @@ public class AirshipInvoker : MonoBehaviour
     {
         foreach(Command c in commands)
         {
-            c.Execute(gameObject);
+            c.Execute(gameObject, scale);
         }
     }
 
@@ -33,5 +34,10 @@ public class AirshipInvoker : MonoBehaviour
     public void ClearAllCommands()
     {
         commands.Clear();
+    }
+
+    public void SetScaleMultiplier(float scale)
+    {
+        this.scale = scale;
     }
 }

@@ -28,7 +28,6 @@ public class BaseHumanController : MonoBehaviour
     public float gravity = 10f;
     public float currentVerticalSpeed = 0f;
     private Vector3 airborneMovement;
-    private float airborneCurrentHorizontalSpeed = 0f;
     [Range(0, 10)]
     public float airborneInitialHorizontalSpeed;
     [Range(0, 10)]

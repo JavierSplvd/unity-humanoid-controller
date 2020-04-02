@@ -21,7 +21,7 @@ public class ThrowSwordCommand : Command
     }
 
     // Update is called once per frame
-    public override void Execute(GameObject gameObject)
+    public override void Execute(GameObject gameObject, float scale = 1f)
     {
         if(Vector3.Distance(originalPosition, gameObject.transform.position) > maxDistance)
         {

@@ -31,6 +31,10 @@ public class Jiggle : MonoBehaviour
 	public bool SquashAndStretch = true;
 	public float sideStretch = 0.15f;
 	public float frontStretch = 0.2f;
+
+	private Vector3 forwardVector = Vector3.zero;
+	private Vector3 upVector = Vector3.zero;
+	private Vector3 dynamicPosSanitized = Vector3.zero;
  
 	void Awake(){
 		// Set targetPos and dynamicPos at startup
@@ -43,8 +47,8 @@ public class Jiggle : MonoBehaviour
 		transform.rotation = new Quaternion();
  
 		// Update forwardVector and upVector
-		Vector3 forwardVector = transform.TransformDirection(new Vector3((boneAxis.x * targetDistance),(boneAxis.y * targetDistance),(boneAxis.z * targetDistance)));
-		Vector3 upVector = transform.TransformDirection(new Vector3(0,1,0));
+		forwardVector = transform.TransformDirection(new Vector3((boneAxis.x * targetDistance),(boneAxis.y * targetDistance),(boneAxis.z * targetDistance)));
+		upVector = transform.TransformDirection(new Vector3(0,1,0));
  
 		// Calculate target position
 		targetPos = transform.position + transform.TransformDirection(new Vector3((boneAxis.x * targetDistance),(boneAxis.y * targetDistance),(boneAxis.z * targetDistance)));
@@ -66,7 +70,7 @@ public class Jiggle : MonoBehaviour
 		// Update dynamic postion
 		dynamicPos += vel + force;
 
-		Vector3 dynamicPosSanitized = dynamicPos;
+		dynamicPosSanitized = dynamicPos;
 		if(Vector3.Distance(dynamicPos, forwardVector + transform.position) > targetDistance * maxDistancePercentage)
 		{
 			dynamicPosSanitized = forwardVector + transform.position + (- forwardVector - transform.position + dynamicPos).normalized * targetDistance * maxDistancePercentage;

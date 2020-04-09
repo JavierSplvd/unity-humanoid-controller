@@ -37,6 +37,7 @@ public class BaseHumanController : MonoBehaviour
 
     private float maxCapsuleHeight;
     private float currentCapsuleHeight;
+    private Vector3 steerNewDirection = Vector3.zero;
 
     void Start()
     {
@@ -98,10 +99,8 @@ public class BaseHumanController : MonoBehaviour
         {
             return;
         }
-        Vector3 newDirection = Vector3.RotateTowards(transform.forward, inputCameraReferenceSystem, singleStep * angle / 180, 0.0f);
-
-        Quaternion rotation = Quaternion.LookRotation(newDirection, Vector3.up);
-        transform.rotation = rotation;
+        steerNewDirection = Vector3.RotateTowards(transform.forward, inputCameraReferenceSystem, singleStep * angle / 180, 0.0f);
+        transform.rotation = Quaternion.LookRotation(steerNewDirection, Vector3.up);
     }
 
     void Falling()
@@ -188,9 +187,7 @@ public class BaseHumanController : MonoBehaviour
 
     void CalculateVerticalMovement()
     {
-        bool isGrounded = IsGrounded();
-
-        if (isGrounded)
+        if (IsGrounded())
         {
             currentVerticalSpeed = -gravity * Time.deltaTime;
 

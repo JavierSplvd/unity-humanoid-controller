@@ -46,6 +46,8 @@ public class GPUSpawner : MonoBehaviour
     private List<Matrix4x4[]> matrices = new List<Matrix4x4[]>();
     void Start()
     {
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+
         InitPool();
         instances = pool.Count;
         int currentBatchList = 0;
@@ -56,12 +58,9 @@ public class GPUSpawner : MonoBehaviour
             batches.Add(new List<ObjData>());
             matrices.Add(new Matrix4x4[1]);
         }
-        Debug.LogWarning("Batches "+numberOfBatchLists);
-        Debug.LogWarning("Batches "+batches.Count);
 
         for (int i = 0; i < instances; i++)
         {
-            Debug.LogWarning((int) Mathf.Floor(i / 1023f));
             batches[(int) Mathf.Floor(i / 1023f)].Add(pool[i]);
         }
 
@@ -72,8 +71,10 @@ public class GPUSpawner : MonoBehaviour
             j = j + 1;
         }
 
-        Debug.LogWarning("Matrices " + matrices.Count);
-        Debug.LogWarning("");
+        watch.Stop();
+        var elapsedMs = watch.ElapsedMilliseconds;
+        Debug.LogWarning("Elapsed time (ms) of the GPUSpawner: " + elapsedMs);
+
     }
 
     void Update()

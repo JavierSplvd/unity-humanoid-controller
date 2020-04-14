@@ -4,7 +4,10 @@ using UnityEngine;
 public class NavAgentController : MonoBehaviour
 {
     public GameObject target;
+    public GameObject subject;
+    public float maxDistanceFromSubject;
     private NavMeshAgent navMeshAgent;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -14,6 +17,14 @@ public class NavAgentController : MonoBehaviour
 
     void MoveAgent()
     {
-        navMeshAgent.SetDestination(target.transform.position);
+        if(Vector3.Distance(transform.position, subject.transform.position) < maxDistanceFromSubject)
+        {
+            navMeshAgent.SetDestination(target.transform.position);
+            navMeshAgent.Resume();
+        }
+        else
+        {
+            navMeshAgent.Stop();
+        }
     }
 }

@@ -38,6 +38,7 @@ public class BaseHumanController : MonoBehaviour
     private float maxCapsuleHeight;
     private float currentCapsuleHeight;
     private Vector3 steerNewDirection = Vector3.zero;
+    private float forwardMultiplier = 0.3f;
 
     void Start()
     {
@@ -59,7 +60,7 @@ public class BaseHumanController : MonoBehaviour
         inputWorldCoordinates = GetInputInWorldCoordinates(h, v);
         inputCameraReferenceSystem = CalculateInputWithCameraAsReferenceSystem();
         inputCameraReferenceSystem = 0.4f * inputCameraReferenceSystem + 0.6f * lastInputCameraReferenceSystem;
-        anim.SetFloat("forward", inputCameraReferenceSystem.magnitude);
+        anim.SetFloat("forward", inputCameraReferenceSystem.magnitude*forwardMultiplier);
         angle = Vector3.Angle(inputCameraReferenceSystem, transform.forward);
         anim.SetFloat("direction", angle);
         Debug.DrawRay(transform.position, inputWorldCoordinates * 10, Color.green);
@@ -68,7 +69,7 @@ public class BaseHumanController : MonoBehaviour
 
         TriggerJump();
         ReduceCapsuleHeightWhileJumping();
-
+        ChangeForwardMultiplier();
         lastInputCameraReferenceSystem = new Vector3(inputCameraReferenceSystem.x, inputCameraReferenceSystem.y, inputCameraReferenceSystem.z);
     }
 
@@ -77,6 +78,26 @@ public class BaseHumanController : MonoBehaviour
         CalculateVerticalMovement();
 
         Steer();
+    }
+
+    void ChangeForwardMultiplier()
+    {
+        if (Input.GetKeyUp("c"))
+        {
+            switch (forwardMultiplier)
+            {
+                case 0.3f:
+                    forwardMultiplier = 0.6f;
+                    break;
+                case 0.6f:
+                    forwardMultiplier = 1f;
+                    break;
+                case 1f:
+                    forwardMultiplier = 0.3f; ;
+                    break;
+            }
+        }
+
     }
 
     void Steer()
@@ -147,11 +168,11 @@ public class BaseHumanController : MonoBehaviour
 
     public Vector3 CalculateInputWithCameraAsReferenceSystem()
     {
-        Vector3 forwardProjected = Vector3.ProjectOnPlane(movementAxis.forward * Input.GetAxis("Vertical"), Vector3.up);
-        Vector3 rightProjected = Vector3.ProjectOnPlane(movementAxis.right * Input.GetAxis("Horizontal"), Vector3.up);
+        Vector3 forwardProjected = Vector3.ProjectOnPlane(movementAxis.forward * Input.GetAxis("Vertical"), Vector3.up).normalized;
+        Vector3 rightProjected = Vector3.ProjectOnPlane(movementAxis.right * Input.GetAxis("Horizontal"), Vector3.up).normalized;
 
         Vector3 inputMovementDirection = forwardProjected + rightProjected;
-        return inputMovementDirection;
+        return inputMovementDirection.normalized;
     }
 
     public Vector3 GetInputInWorldCoordinates(float horizontal, float vertical)

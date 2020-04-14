@@ -50,7 +50,6 @@ public class GPUSpawner : MonoBehaviour
 
         InitPool();
         instances = pool.Count;
-        int currentBatchList = 0;
 
         int numberOfBatchLists = (int) Mathf.Ceil(instances / 1023f);
         for(int n = 0; n < numberOfBatchLists; n++)

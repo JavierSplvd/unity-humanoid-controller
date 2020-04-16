@@ -13,7 +13,6 @@ public class SteerToTargetCommand : Command
 
     public override void Execute(GameObject gameObject, float scale = 1f)
     {
-        Debug.Log(target.transform.position);
         // Determine which direction to rotate towards
         Vector3 targetDirection = target.transform.position - gameObject.transform.position;
 

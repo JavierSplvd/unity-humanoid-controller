@@ -28,7 +28,7 @@ public class Jiggle : MonoBehaviour
 	Vector3 vel = new Vector3();
  
 	// Squash and stretch variables
-	public bool SquashAndStretch = true;
+	public bool SquashAndStretch = false;
 	public float sideStretch = 0.15f;
 	public float frontStretch = 0.2f;
 
@@ -85,6 +85,8 @@ public class Jiggle : MonoBehaviour
 		// Set bone rotation to look at dynamicPos
 		// transform.LookAt(dynamicPos, upVector);
         transform.LookAt(dynamicPosSanitized, -Vector3.right);
+		
+		// Keep always the right vector (red) upwards
 		if(transform.right.y < 0)
         {
             transform.Rotate(new Vector3(0,0,180));

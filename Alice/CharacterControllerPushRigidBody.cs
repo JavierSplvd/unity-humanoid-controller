@@ -8,9 +8,9 @@ public class CharacterControllerPushRigidBody : MonoBehaviour
     public float pushPower = 2.0f;
     public float weight = 6.0f;
 
+    private Vector3 applicationForce;
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        Debug.Log("hit");
         Rigidbody body = hit.collider.attachedRigidbody;
         Vector3 force;
 
@@ -29,6 +29,11 @@ public class CharacterControllerPushRigidBody : MonoBehaviour
         }
 
         // Apply the push
-        body.AddForceAtPosition(force, hit.point);
+        applicationForce.x = hit.point.x;
+        applicationForce.z = hit.point.z;
+        applicationForce.y = hit.point.y * 0.5f + (transform.position.y + 1.5f) * 0.5f;
+        body.AddForceAtPosition(force, applicationForce);
+        Debug.Log("hit: " + applicationForce.ToString());
+
     }
 }

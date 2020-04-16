@@ -17,18 +17,23 @@ public class ScanCommand : Command
 
     public override void Execute(GameObject gameObject, float scale = 1)
     {
-        for(int i = 0; i<360; i++)
+        for (int i = 0; i < 100; i++)
         {
-            direction = new Vector3(Mathf.Sin(i), 0, Mathf.Cos(i));
-            if (Physics.Raycast(gameObject.transform.position, direction, out hit, raycastDistance, rayMask))
+            direction = new Vector3(Mathf.Sin(2 * 0.031415f * i), 0, Mathf.Cos(2 * 0.031415f * i));
+            Debug.DrawRay(gameObject.transform.position + Vector3.up, direction * raycastDistance, Color.green, 0.1f);
+
+            if (Physics.Raycast(gameObject.transform.position + Vector3.up, direction, out hit, raycastDistance, rayMask))
             {
-                Debug.DrawRay(gameObject.transform.position, direction * raycastDistance, Color.green, 0.1f);
-                Debug.Log("hit");
-                hitListener.Notify();
-                break;
+                if (hit.collider.gameObject.layer == 9)
+                {
+                    Debug.Log("hit");
+                    hitListener.Notify();
+                    break;
+                }
+
             }
 
         }
-        
+
     }
 }

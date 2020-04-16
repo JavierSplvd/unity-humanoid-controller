@@ -18,6 +18,7 @@ public class AxisToSlider : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Right analog is horizontal=Axis4 and vertical=Axis5
         slider.value = Input.GetAxis(axisToWatch);
     }
 }

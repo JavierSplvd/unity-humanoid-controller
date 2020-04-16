@@ -21,19 +21,20 @@ public class CharacterControllerPushRigidBody : MonoBehaviour
         // our velocity and push power to push things other directions
         if (hit.moveDirection.y < -0.3)
         {
-            force = new Vector3(0, -0.5f, 0) * Physics.gravity.sqrMagnitude * weight;
+            force = Physics.gravity * weight;
         }
         else
         {
-            force = hit.controller.velocity * pushPower;
+            force = hit.controller.gameObject.transform.forward * pushPower;
         }
 
         // Apply the push
         applicationForce.x = hit.point.x;
         applicationForce.z = hit.point.z;
-        applicationForce.y = hit.point.y * 0.5f + (transform.position.y + 1.5f) * 0.5f;
+        applicationForce.y = body.gameObject.transform.position.y;
         body.AddForceAtPosition(force, applicationForce);
-        Debug.Log("hit: " + applicationForce.ToString());
+        Debug.Log("applicationForce: " + applicationForce.ToString());
+        Debug.Log("force: " + force.ToString());
 
     }
 }

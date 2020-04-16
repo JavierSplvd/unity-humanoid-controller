@@ -23,6 +23,8 @@ public class BaseHumanController : MonoBehaviour
     public string locomotionJumpStateName = "Locomotion jump";
     public string fallingStateName = "Falling";
     public string jumpStateName = "Jump";
+    public string climbingStateName = "Climbing";
+    public string climbingFinsihStateName = "Climbing Finish";
     private float angle = 0f;
     public float initialJumpSpeed = 10f;
     public float gravity = 10f;
@@ -34,11 +36,15 @@ public class BaseHumanController : MonoBehaviour
     public float airborneHorizontalDrag;
     [Tooltip("Capa de los objetos donde se puede ajustar el pie")]
     public LayerMask rayMask;
+    public LayerMask climbingRayMask;
 
+    private bool isClimbing = false;
     private float maxCapsuleHeight;
     private float currentCapsuleHeight;
     private Vector3 steerNewDirection = Vector3.zero;
-    private float forwardMultiplier = 0.3f;
+    private Spring crouchMultiplier = new Spring(100, 1, 0);
+    private RaycastHit hit;
+    private float h,v;
 
     void Start()
     {
@@ -55,12 +61,14 @@ public class BaseHumanController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
+        h = Input.GetAxis("Horizontal");
+        v = Input.GetAxis("Vertical");
         inputWorldCoordinates = GetInputInWorldCoordinates(h, v);
         inputCameraReferenceSystem = CalculateInputWithCameraAsReferenceSystem();
         inputCameraReferenceSystem = 0.4f * inputCameraReferenceSystem + 0.6f * lastInputCameraReferenceSystem;
-        anim.SetFloat("forward", inputCameraReferenceSystem.magnitude*forwardMultiplier);
+        anim.SetFloat("forward", inputCameraReferenceSystem.magnitude);
+        anim.SetFloat("forward absolute", v);
+        anim.SetFloat("crouching", crouchMultiplier.GetX());
         angle = Vector3.Angle(inputCameraReferenceSystem, transform.forward);
         anim.SetFloat("direction", angle);
         Debug.DrawRay(transform.position, inputWorldCoordinates * 10, Color.green);
@@ -70,6 +78,9 @@ public class BaseHumanController : MonoBehaviour
         TriggerJump();
         ReduceCapsuleHeightWhileJumping();
         ChangeForwardMultiplier();
+        OnClimbingEnter();
+        OnClimbingStay();
+        OnClimbingExit();
         lastInputCameraReferenceSystem = new Vector3(inputCameraReferenceSystem.x, inputCameraReferenceSystem.y, inputCameraReferenceSystem.z);
     }
 
@@ -84,19 +95,17 @@ public class BaseHumanController : MonoBehaviour
     {
         if (Input.GetKeyUp("c"))
         {
-            switch (forwardMultiplier)
+            switch (crouchMultiplier.GetX0())
             {
-                case 0.3f:
-                    forwardMultiplier = 0.6f;
+                case 0f:
+                    crouchMultiplier.SetX0(0.9f);
                     break;
-                case 0.6f:
-                    forwardMultiplier = 1f;
-                    break;
-                case 1f:
-                    forwardMultiplier = 0.3f; ;
+                case 0.9f:
+                    crouchMultiplier.SetX0(0f);
                     break;
             }
         }
+        crouchMultiplier.Update(Time.deltaTime);
 
     }
 
@@ -107,6 +116,10 @@ public class BaseHumanController : MonoBehaviour
         if (state.IsName("Idle") || state.IsName("Locomotion"))
         {
             shouldSteer = true;
+        }
+        if(state.IsName(climbingStateName))
+        {
+            shouldSteer = false;
         }
         if (!shouldSteer)
         {
@@ -168,11 +181,11 @@ public class BaseHumanController : MonoBehaviour
 
     public Vector3 CalculateInputWithCameraAsReferenceSystem()
     {
-        Vector3 forwardProjected = Vector3.ProjectOnPlane(movementAxis.forward * Input.GetAxis("Vertical"), Vector3.up).normalized;
-        Vector3 rightProjected = Vector3.ProjectOnPlane(movementAxis.right * Input.GetAxis("Horizontal"), Vector3.up).normalized;
+        Vector3 forwardProjected = Vector3.ProjectOnPlane(movementAxis.forward * Input.GetAxis("Vertical"), Vector3.up);
+        Vector3 rightProjected = Vector3.ProjectOnPlane(movementAxis.right * Input.GetAxis("Horizontal"), Vector3.up);
 
         Vector3 inputMovementDirection = forwardProjected + rightProjected;
-        return inputMovementDirection.normalized;
+        return inputMovementDirection;
     }
 
     public Vector3 GetInputInWorldCoordinates(float horizontal, float vertical)
@@ -217,6 +230,10 @@ public class BaseHumanController : MonoBehaviour
             //     currentVerticalSpeed = initialJumpSpeed;
             //     airborneCurrentHorizontalSpeed = airborneInitialHorizontalSpeed * inputCameraReferenceSystem.sqrMagnitude;
             // }
+        }
+        else if (isClimbing || anim.GetCurrentAnimatorStateInfo(0).IsName(climbingFinsihStateName))
+        {
+            currentVerticalSpeed = 0;
         }
         else
         {
@@ -267,6 +284,49 @@ public class BaseHumanController : MonoBehaviour
     public Vector3 GetInputInCameraCoordinates()
     {
         return inputCameraReferenceSystem;
+    }
+
+    private void OnClimbingEnter() 
+    {
+        bool topRay = Physics.Raycast(transform.position + Vector3.up, transform.forward, out hit, maxDistance:0.3f, layerMask:climbingRayMask);
+        bool bottomRay = Physics.Raycast(transform.position, transform.forward, out hit, maxDistance:0.3f, layerMask:climbingRayMask);
+
+        if((topRay || bottomRay) && hit.collider.tag.Equals("Climbing"))
+        {
+            isClimbing = true;
+            anim.SetBool("climbing", true);
+        }    
+    }
+
+    private void OnClimbingStay()
+    {
+        if(isClimbing)
+        {
+            bool ray = Physics.Raycast(transform.position, transform.forward, out hit, maxDistance:0.3f, layerMask:climbingRayMask);
+            transform.forward = Vector3.Lerp(transform.forward, - hit.normal, 0.2f);
+        }
+    }
+
+    private void OnClimbingExit() 
+    {
+        bool topRay = Physics.Raycast(transform.position + 1.5f * Vector3.up, transform.forward, out hit, maxDistance:0.6f, layerMask:climbingRayMask);
+        bool bottomRay = Physics.Raycast(transform.position - 0.5f * Vector3.up, transform.forward, out hit, maxDistance:0.6f, layerMask:climbingRayMask);
+
+        if(!topRay && bottomRay)
+        {
+            Debug.Log("exit!?");
+            anim.SetTrigger("finish climbing");
+        }
+        else if(!topRay && !bottomRay)
+        {
+            isClimbing = false;
+            anim.SetBool("climbing", false);
+        }
+        else if(topRay && !bottomRay && v < 0)
+        {
+            isClimbing = false;
+            anim.SetBool("climbing", false);
+        }
     }
 
 

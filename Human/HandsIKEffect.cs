@@ -35,12 +35,15 @@ public class HandsIKEffect : MonoBehaviour
         if(CheckLeftHand() && IkActive)
         {
             anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, weight);
-            anim.SetIKPosition(AvatarIKGoal.LeftHand, transform.position + handHeight * Vector3.up - transform.right * 0.2f + transform.forward * 0.2f);
+            anim.SetIKPosition(AvatarIKGoal.LeftHand, hit.point + hit.normal * 0.1f);
             anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1f);
             anim.SetIKRotation(AvatarIKGoal.LeftHand, Quaternion.LookRotation(2f * transform.up + transform.right + transform.forward));
+        }
 
+        if(CheckRightHand() && IkActive)
+        {
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, weight);
-            anim.SetIKPosition(AvatarIKGoal.RightHand, transform.position + handHeight * Vector3.up + transform.right * 0.2f + transform.forward * 0.2f);
+            anim.SetIKPosition(AvatarIKGoal.RightHand, hit.point + hit.normal * 0.1f);
             anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1f);
             anim.SetIKRotation(AvatarIKGoal.RightHand, Quaternion.LookRotation(2f * transform.up - transform.right + transform.forward));
         }
@@ -49,7 +52,20 @@ public class HandsIKEffect : MonoBehaviour
     bool CheckLeftHand()
     {
         Vector3 handPosition = transform.position + handHeight * Vector3.up - transform.right * 0.2f;
-        if (Physics.Raycast(handPosition, transform.forward, out hit, raycastDistance, RayMask))
+        return CheckRay(handPosition);
+        
+    }
+
+    bool CheckRightHand()
+    {
+        Vector3 handPosition = transform.position + handHeight * Vector3.up + transform.right * 0.2f;
+        return CheckRay(handPosition);
+        
+    }
+
+    bool CheckRay(Vector3 position)
+    {
+        if (Physics.Raycast(position, transform.forward, out hit, raycastDistance, RayMask))
         {
             weight = Time.deltaTime + weight;
             return true;

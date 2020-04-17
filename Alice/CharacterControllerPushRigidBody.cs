@@ -6,7 +6,6 @@ public class CharacterControllerPushRigidBody : MonoBehaviour
 {
     // this script pushes all rigidbodies that the character touches
     public float pushPower = 2.0f;
-    public float weight = 6.0f;
 
     private Vector3 applicationForce;
     void OnControllerColliderHit(ControllerColliderHit hit)
@@ -19,14 +18,7 @@ public class CharacterControllerPushRigidBody : MonoBehaviour
 
         // We use gravity and weight to push things down, we use
         // our velocity and push power to push things other directions
-        if (hit.moveDirection.y < -0.3)
-        {
-            force = Physics.gravity * weight;
-        }
-        else
-        {
-            force = hit.controller.gameObject.transform.forward * pushPower;
-        }
+        force = hit.controller.gameObject.transform.forward * pushPower * Time.deltaTime;
 
         // Apply the push
         applicationForce.x = hit.point.x;

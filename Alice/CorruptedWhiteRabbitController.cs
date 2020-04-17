@@ -59,6 +59,7 @@ public class CorruptedWhiteRabbitController : MonoBehaviour
 
     private void AddMovementBehaviour()
     {
+        invoker.ClearAllCommands();
         invoker.AddCommand(swingCommand);
         invoker.AddCommand(moveForwardCommand);
         invoker.AddCommand(steerCommand);
@@ -72,6 +73,10 @@ public class CorruptedWhiteRabbitController : MonoBehaviour
         if(Vector3.Distance(transform.position, navAgent.transform.position) < 1f)
         {
             invoker.ClearAllCommands();
+        }
+        else
+        {
+            AddMovementBehaviour();
         }
     }
 

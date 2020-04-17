@@ -17,9 +17,9 @@ public class ScanCommand : Command
 
     public override void Execute(GameObject gameObject, float scale = 1)
     {
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 10; i++)
         {
-            direction = new Vector3(Mathf.Sin(2 * 0.031415f * i), 0, Mathf.Cos(2 * 0.031415f * i));
+            direction = new Vector3(Mathf.Sin(2 * 0.31415f * i), 0, Mathf.Cos(2 * 0.31415f * i));
             Debug.DrawRay(gameObject.transform.position + Vector3.up, direction * raycastDistance, Color.green, 0.1f);
 
             if (Physics.Raycast(gameObject.transform.position + Vector3.up, direction, out hit, raycastDistance, rayMask))

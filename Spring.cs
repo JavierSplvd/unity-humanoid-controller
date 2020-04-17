@@ -7,12 +7,13 @@ public class Spring
         this.k = k;
         this.m = m;
         this.x0 = x0;
+        this.x = x0;
     }
 
     public void Update(float deltaTime)
     {
         a = - k * (x-x0) / m;
-        v = a * deltaTime + 0.9f * v; // 10% damping
+        v = a * deltaTime + 0.8f * v; // 20% damping
         x += v * deltaTime;
     }
 

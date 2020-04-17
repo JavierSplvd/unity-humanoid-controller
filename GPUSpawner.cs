@@ -16,10 +16,17 @@ public class ObjData
         rot = t.rotation;
     }
 
-    public ObjData(Vector3 position)
+    public ObjData(Vector3 position, bool randomScale)
     {
         pos = position;
-        scale = Vector3.one;
+        if(randomScale)
+        {
+            scale = Vector3.one * Random.RandomRange(0.8f, 1.2f);
+        }
+        else
+        {
+            scale = Vector3.one;
+        }
         rot = Quaternion.Euler(0, Random.Range(0,180), 0);
     }
 
@@ -39,6 +46,7 @@ public class GPUSpawner : MonoBehaviour
     public Material objMat;
     public int intancesPerChild = 75;
     public ShadowCastingMode shadowCastMode = ShadowCastingMode.Off;
+    public bool randomScale = false;
 
     private List<ObjData> pool = new List<ObjData>();
 
@@ -129,7 +137,7 @@ public class GPUSpawner : MonoBehaviour
                 modPos = currentPos;
                 modPos.x += NextGaussian();
                 modPos.z += NextGaussian();
-                pool.Add(new ObjData(modPos));
+                pool.Add(new ObjData(modPos, randomScale));
             }
         }
     }

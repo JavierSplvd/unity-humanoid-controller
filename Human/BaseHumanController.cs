@@ -2,6 +2,49 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public class Stamina
+{
+    private float current;
+    private float min = 0f;
+    private float max = 100f;
+    private float recSpeed;
+    private float spendSpeed;
+
+    public Stamina(float recSpeed, float spendSpeed)
+    {
+        current = max;
+        this.recSpeed = recSpeed;
+        this.spendSpeed = spendSpeed;
+    }
+
+    public void Recover(float deltaTime)
+    {
+        current += deltaTime * recSpeed;
+        if(current > max)
+        {
+            current = max;
+        }
+    }
+
+    public void Spend(float deltaTime)
+    {
+        current -= deltaTime * spendSpeed;
+        if(current < min)
+        {
+            current = min;
+        }
+    }
+
+    public float GetCurrent()
+    {
+        return current;
+    }
+    public float GetCurrentPercentage()
+    {
+        return current/max;
+    }
+}
+
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(CharacterController))]
 public class BaseHumanController : MonoBehaviour
@@ -43,8 +86,11 @@ public class BaseHumanController : MonoBehaviour
     private float currentCapsuleHeight;
     private Vector3 steerNewDirection = Vector3.zero;
     private Spring crouchMultiplier = new Spring(100, 1, 0);
+    private Spring runMultiplier = new Spring(100, 1, 1);
     private RaycastHit hit;
     private float h,v;
+    private HandsIKEffect handsIKEffect;
+    private Stamina stamina;
 
     void Start()
     {
@@ -56,6 +102,8 @@ public class BaseHumanController : MonoBehaviour
         airborneMovement = new Vector3(0, 0, 0);
         maxCapsuleHeight = characterController.height;
         currentCapsuleHeight = maxCapsuleHeight;
+        handsIKEffect = GetComponent<HandsIKEffect>();
+        stamina = new Stamina(20,30);
     }
 
     // Update is called once per frame
@@ -66,7 +114,8 @@ public class BaseHumanController : MonoBehaviour
         inputWorldCoordinates = GetInputInWorldCoordinates(h, v);
         inputCameraReferenceSystem = CalculateInputWithCameraAsReferenceSystem();
         inputCameraReferenceSystem = 0.4f * inputCameraReferenceSystem + 0.6f * lastInputCameraReferenceSystem;
-        anim.SetFloat("forward", inputCameraReferenceSystem.magnitude);
+        Run();
+        anim.SetFloat("forward", inputCameraReferenceSystem.magnitude * runMultiplier.GetX());
         anim.SetFloat("forward absolute", v);
         anim.SetFloat("crouching", crouchMultiplier.GetX());
         angle = Vector3.Angle(inputCameraReferenceSystem, transform.forward);
@@ -91,9 +140,25 @@ public class BaseHumanController : MonoBehaviour
         Steer();
     }
 
+    void Run()
+    {
+        if (Input.GetButton("Button B") && stamina.GetCurrent() > 0)
+        {
+            Debug.Log("Run");
+            runMultiplier.SetX0(2f);
+            stamina.Spend(Time.deltaTime);
+        }
+        else
+        {
+            runMultiplier.SetX0(1f);
+            stamina.Recover(Time.deltaTime);
+        }
+        runMultiplier.Update(Time.deltaTime);
+    }
+
     void ChangeForwardMultiplier()
     {
-        if (Input.GetKeyUp("c"))
+        if (Input.GetButtonUp("Button A"))
         {
             switch (crouchMultiplier.GetX0())
             {
@@ -288,11 +353,12 @@ public class BaseHumanController : MonoBehaviour
 
     private void OnClimbingEnter() 
     {
-        bool topRay = Physics.Raycast(transform.position + Vector3.up, transform.forward, out hit, maxDistance:0.3f, layerMask:climbingRayMask);
-        bool bottomRay = Physics.Raycast(transform.position, transform.forward, out hit, maxDistance:0.3f, layerMask:climbingRayMask);
+        bool topRay = Physics.Raycast(transform.position + Vector3.up, transform.forward, out hit, maxDistance:0.4f, layerMask:climbingRayMask);
+        bool bottomRay = Physics.Raycast(transform.position, transform.forward, out hit, maxDistance:0.4f, layerMask:climbingRayMask);
 
         if((topRay || bottomRay) && hit.collider.tag.Equals("Climbing"))
         {
+            Debug.Log("enter climbing");
             isClimbing = true;
             anim.SetBool("climbing", true);
         }    
@@ -302,8 +368,13 @@ public class BaseHumanController : MonoBehaviour
     {
         if(isClimbing)
         {
-            bool ray = Physics.Raycast(transform.position, transform.forward, out hit, maxDistance:0.3f, layerMask:climbingRayMask);
+            bool ray = Physics.Raycast(transform.position, transform.forward, out hit, maxDistance:0.4f, layerMask:climbingRayMask);
             transform.forward = Vector3.Lerp(transform.forward, - hit.normal, 0.2f);
+            handsIKEffect.IkActive = false;
+        }
+        else
+        {
+            handsIKEffect.IkActive = true;
         }
     }
 
@@ -327,6 +398,11 @@ public class BaseHumanController : MonoBehaviour
             isClimbing = false;
             anim.SetBool("climbing", false);
         }
+    }
+
+    public float GetPercentageCurrentStamina()
+    {
+        return stamina.GetCurrentPercentage();
     }
 
 

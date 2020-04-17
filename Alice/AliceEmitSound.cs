@@ -12,7 +12,10 @@ public class AliceEmitSound : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        for (int i = 0; i<60; i++)
+        {
+            velocities.Enqueue(0f);
+        }
     }
 
     // Update is called once per frame

@@ -381,7 +381,7 @@ public class BaseHumanController : MonoBehaviour
     private void OnClimbingExit() 
     {
         bool topRay = Physics.Raycast(transform.position + 1.5f * Vector3.up, transform.forward, out hit, maxDistance:0.6f, layerMask:climbingRayMask);
-        bool bottomRay = Physics.Raycast(transform.position - 0.5f * Vector3.up, transform.forward, out hit, maxDistance:0.6f, layerMask:climbingRayMask);
+        bool bottomRay = Physics.Raycast(transform.position + 0.1f * Vector3.up, transform.forward, out hit, maxDistance:0.6f, layerMask:climbingRayMask);
 
         if(!topRay && bottomRay)
         {

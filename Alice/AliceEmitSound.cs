@@ -14,7 +14,7 @@ public class AliceEmitSound : MonoBehaviour
     {
         for (int i = 0; i<60; i++)
         {
-            velocities.Enqueue(0f);
+            velocities.Enqueue(-100000f);
         }
     }
 

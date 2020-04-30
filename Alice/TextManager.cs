@@ -14,7 +14,7 @@ public class TextManagerCooldown : Cooldown
         currentTime = 0f;
     }
 
-    public override void Cool()
+    public override void Heat()
     {
         currentTime = maxTime;
     }
@@ -26,7 +26,7 @@ public class TextManagerCooldown : Cooldown
 
     public override void Update()
     {
-        currentTime -= Time.deltaTime;
+        currentTime = Mathf.Clamp(currentTime - Time.deltaTime, 0, maxTime);
     }
 }
 
@@ -35,7 +35,7 @@ public class TextManager : MonoBehaviour
 {
     private Text text;
 
-    public enum Dialog { Intro, Climbing, Boxes, Objective, Key, Door }
+    public enum Dialog { None, Intro, Climbing, Boxes, Objective, Key, Door, Flower }
     private float currentAlpha = 0f;
     private float targetAlpha = 1f;
     private Color color;
@@ -71,16 +71,16 @@ public class TextManager : MonoBehaviour
             text.text = GetText(d);
             currentAlpha = 0f;
             targetAlpha = 1f;
+            cooldown.Heat();
+            Debug.Log(cooldown);
         }
 
     }
 
     public void HideText()
     {
-        if (cooldown.IsAvailable())
-        {
-            targetAlpha = 0f;
-        }
+        text.text = GetText(Dialog.None);
+        targetAlpha = 0f;
     }
 
     private string GetText(Dialog d)
@@ -88,17 +88,21 @@ public class TextManager : MonoBehaviour
         switch (d)
         {
             case Dialog.Intro:
-                return "Hello again Alice. I didn't expect you to come back to Wonderland... Especially in these dark times.";
+                return "Hello again Alice. I didn't expect you to come back to Wonderland... Especially in these dark times. Find the key and exit by the door.";
             case Dialog.Boxes:
                 return "You can push the boxes pushing them. Try moving them towards the mushrooms.";
             case Dialog.Climbing:
                 return "You can climb the wall if you walk towards it.";
             case Dialog.Objective:
-                return "You need to get away from here. Get the key and open the door. Take caution with the teapot monster.";
+                return "Take caution making noises with the teapot monster. You should walk or crouch.";
             case Dialog.Door:
                 return "This is the door... Where is it supposed to take me?";
             case Dialog.Key:
-                return "This must be the key.";
+                return "This must be the key for the door.";            
+            case Dialog.None:
+                return "";
+            case Dialog.Flower:
+                return "I wonder if the flowers still sing.";
             default:
                 return "";
         }

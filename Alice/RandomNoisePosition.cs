@@ -5,6 +5,8 @@ using UnityEngine;
 public class RandomNoisePosition : MonoBehaviour
 {
     public float mult, amplitudeX, amplitudeY, amplitudeZ;
+    public bool updateInitialPosition = false;
+
 
     private float x, y, z;
     private Vector3 initialPos, modPos = Vector3.zero;
@@ -17,6 +19,10 @@ public class RandomNoisePosition : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(updateInitialPosition)
+        {
+            initialPos = transform.position;
+        }
         x = Mathf.Sin(Time.time * mult) * amplitudeX + Random.Range(-1, 1) * amplitudeX;
         y = Mathf.Cos(Time.time * mult) * amplitudeY + Random.Range(-1, 1) * amplitudeY;
         z = Mathf.Sin(Time.time * mult) * amplitudeZ + Random.Range(-1, 1) * amplitudeZ;

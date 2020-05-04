@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CorruptedWhiteRabbitInvoker : Invoker
+public class CorruptedWhiteRabbitInvoker : Alice.Invoker
 {
     private List<Command> commands;
     private GameObject gameObject;

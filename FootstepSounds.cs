@@ -5,7 +5,7 @@ using UnityEngine;
 public class FootstepSounds : MonoBehaviour
 {
     public Transform feet;
-    public SoundManager soundManager;
+    public Numian.SoundManager soundManager;
     public LayerMask rayMask;
     public float raycastDistance;
     private bool isNewStep = false;

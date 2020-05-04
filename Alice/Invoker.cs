@@ -1,8 +1,11 @@
 using UnityEngine;
 
-public abstract class Invoker
+namespace Alice
 {
-    public abstract void Update();
-    public abstract void ClearAllCommands();
-    public abstract void AddCommand(Command c);
+    public abstract class Invoker
+    {
+        public abstract void Update();
+        public abstract void ClearAllCommands();
+        public abstract void AddCommand(Command c);
+    }
 }

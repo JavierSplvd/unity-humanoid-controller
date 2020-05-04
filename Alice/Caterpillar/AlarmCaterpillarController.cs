@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-public class AlarmCaterpillarInvoker : Invoker
+public class AlarmCaterpillarInvoker : Alice.Invoker
 {
     private List<Command> commands;
     private GameObject gameObject;

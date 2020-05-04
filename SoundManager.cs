@@ -2,27 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SoundManager : MonoBehaviour
+namespace Numian
 {
-    private AudioSource audioSource;
-    // Start is called before the first frame update
-    void Start()
+    public class SoundManager : MonoBehaviour
     {
-        audioSource = GetComponent<AudioSource>();
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    public void Play()
-    {
-        if(!audioSource.isPlaying)
+        private AudioSource audioSource;
+        // Start is called before the first frame update
+        void Start()
         {
-            audioSource.Play();
+            audioSource = GetComponent<AudioSource>();
+
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+
+        }
+
+        public void Play()
+        {
+            if (!audioSource.isPlaying)
+            {
+                audioSource.Play();
+            }
         }
     }
 }

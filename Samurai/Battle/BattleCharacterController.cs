@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Numian
@@ -10,9 +11,11 @@ namespace Numian
         [SerializeField]
         private bool horizontalMovement = true;
         [SerializeField]
-        private bool hasMoved;
+        private bool hasMoved, isGuarding;
         [SerializeField]
         private DoDamage weapon;
+        [SerializeField]
+        private Stances currentStance = Stances.MiddleStance;
 
         void Start()
         {
@@ -81,14 +84,17 @@ namespace Numian
 
         public void AttackAirStance()
         {
+            currentStance = Stances.HighStance;
             DoAttackStance("AirAttack");
         }
         public void AttackMountainStance()
         {
+            currentStance = Stances.MiddleStance;
             DoAttackStance("MountainAttack");
         }
         public void AttackSeaStance()
         {
+            currentStance = Stances.LowStance;
             DoAttackStance("SeaAttack");
         }
 
@@ -108,7 +114,34 @@ namespace Numian
 
         public void ReceiveDamage(int attackValue)
         {
-            data.currentHealth -= 1;
+            if(isGuarding)
+                attackValue = attackValue / 2;
+                ConsumeGuardStamina();
+            data.currentHealth -= attackValue;
+        }
+
+        private void ConsumeGuardStamina()
+        {
+            data.currentStamina -= 1;
+        }
+
+        public void ReceiveDamage(int attackValue, Stances enemyStance)
+        {
+            int damage = attackValue;
+            if(IsWeakTowardsStance(enemyStance))
+                damage = damage * 2;
+            ReceiveDamage(damage);
+        }
+
+        private bool IsWeakTowardsStance(Stances targetStance)
+        {
+            if(targetStance.Equals(Stances.HighStance) && currentStance.Equals(Stances.MiddleStance))
+                return true;
+            if(targetStance.Equals(Stances.MiddleStance) && currentStance.Equals(Stances.LowStance))
+                return true;
+            if(targetStance.Equals(Stances.LowStance) && currentStance.Equals(Stances.HighStance))
+                return true;
+            return false;
         }
     }
 }

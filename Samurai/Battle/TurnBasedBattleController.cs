@@ -66,6 +66,34 @@ namespace Numian
 
 
     }
+
+    public class NextStateAfterCooldown : Cooldown
+    {
+        private Cooldown internalCooldown = new SimpleCooldown(0.3f);
+        private TurnBasedBattleController turnBasedBattleController;
+
+        public NextStateAfterCooldown(TurnBasedBattleController t)
+        {
+            turnBasedBattleController = t;
+        }
+
+        public override void Heat()
+        {
+            internalCooldown.Heat();
+        }
+
+        public override bool IsAvailable()
+        {
+            return internalCooldown.IsAvailable();
+        }
+
+        public override void Update()
+        {
+            internalCooldown.Update();
+            if(IsAvailable())
+                turnBasedBattleController.NextState();
+        }
+    }
     public class TurnBasedBattleController : MonoBehaviour
     {
         [SerializeField]
@@ -74,6 +102,7 @@ namespace Numian
         private BattleCharacterController playerCharController;
         [SerializeField]
         private GameObject[] actionButtons;
+        private Cooldown upkeepCooldown;
         // Start is called before the first frame update
         void Start()
         {
@@ -81,6 +110,14 @@ namespace Numian
             actionButtons = GameObject.FindGameObjectsWithTag("actionButton");
             CleanWorld();
             UpdateWorld();
+        }
+
+        void Update()
+        {
+            if(upkeepCooldown != null)
+                upkeepCooldown.Update();
+                if(upkeepCooldown.IsAvailable())
+                    upkeepCooldown = null;
         }
 
         void UpdateWorld()
@@ -110,6 +147,8 @@ namespace Numian
             if (turnStateMachine.GetState().Equals(BattleStates.Upkeep))
             {
                 ResetPlayer();
+                upkeepCooldown = new NextStateAfterCooldown(this);
+                upkeepCooldown.Heat();
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.EarlyMove))
             {
@@ -171,6 +210,14 @@ namespace Numian
             turnStateMachine.NextState();
             CleanWorld();
             UpdateWorld();
+        }
+
+        public BattleStates GetState(){
+            return turnStateMachine.GetState();
+        }
+
+        public Teams GetTeam(){
+            return turnStateMachine.GetTeam();
         }
     }
 }

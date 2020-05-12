@@ -3,6 +3,6 @@ namespace Numian {
     {
         HighStance,
         MiddleStance,
-        LowStance
+        LowStance,
     }
 }

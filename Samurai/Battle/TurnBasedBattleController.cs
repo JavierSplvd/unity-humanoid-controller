@@ -22,6 +22,7 @@ namespace Numian
             teams.Add(Teams.Player);
             teams.Add(Teams.Enemy);
             states = new List<BattleStates>();
+            states.Add(BattleStates.Upkeep);
             states.Add(BattleStates.EarlyMove);
             states.Add(BattleStates.Action);
             states.Add(BattleStates.LateMove);
@@ -33,7 +34,7 @@ namespace Numian
         public void NextState()
         {
             currentState = NextOnTheList(currentState, states);
-            if(currentState.Equals(states[0]))
+            if (currentState.Equals(states[0]))
                 NextTeam();
         }
 
@@ -69,16 +70,22 @@ namespace Numian
     {
         [SerializeField]
         private TurnStateMachine turnStateMachine;
+        [SerializeField]
+        private BattleCharacterController playerCharController;
+        [SerializeField]
+        private GameObject[] actionButtons;
         // Start is called before the first frame update
         void Start()
         {
             turnStateMachine = new TurnStateMachine();
+            actionButtons = GameObject.FindGameObjectsWithTag("actionButton");
+            CleanWorld();
+            UpdateWorld();
         }
 
-        // Update is called once per frame
-        void Update()
+        void UpdateWorld()
         {
-            switch(turnStateMachine.GetTeam())
+            switch (turnStateMachine.GetTeam())
             {
                 case Teams.Player:
                     PlayerTurn();
@@ -92,30 +99,66 @@ namespace Numian
             }
         }
 
+        private void CleanWorld()
+        {
+            DeactivatePlayerMovement();
+            DeactivateActionSelection();
+        }
+
         private void PlayerTurn()
         {
-            if(turnStateMachine.GetState().Equals(BattleStates.EarlyMove)){
-                ActivatePlayerMovement();
+            if (turnStateMachine.GetState().Equals(BattleStates.Upkeep))
+            {
+                ResetPlayer();
             }
-            else if(turnStateMachine.GetState().Equals(BattleStates.Action)){
+            else if (turnStateMachine.GetState().Equals(BattleStates.EarlyMove))
+            {
+                ActivatePlayerMovement();                
+            }
+            else if (turnStateMachine.GetState().Equals(BattleStates.Action))
+            {
                 ActivateActionSelection();
             }
-            else if(turnStateMachine.GetState().Equals(BattleStates.LateMove)){
-                ActivatePlayerMovement();
+            else if (turnStateMachine.GetState().Equals(BattleStates.LateMove))
+            {
+                if(playerCharController.HasMoved())
+                    NextState();
+                else
+                    ActivatePlayerMovement();
             }
-            else if(turnStateMachine.GetState().Equals(BattleStates.Cleanup)){
-                
+            else if (turnStateMachine.GetState().Equals(BattleStates.Cleanup))
+            {
+
             }
         }
 
         private void ActivateActionSelection()
         {
-            throw new NotImplementedException();
+            foreach (GameObject g in actionButtons)
+            {
+                g.SetActive(true);
+            }
         }
-
+        private void DeactivateActionSelection()
+        {
+            foreach (GameObject g in actionButtons)
+            {
+                g.SetActive(false);
+            }
+        }
         private void ActivatePlayerMovement()
         {
-            throw new NotImplementedException();
+            playerCharController.SetHorizontalMovement(true);
+        }
+
+        private void DeactivatePlayerMovement()
+        {
+            playerCharController.SetHorizontalMovement(false);
+        }
+
+        private void ResetPlayer()
+        {
+            playerCharController.ResetMove();
         }
 
         private void EnemyTurn()
@@ -126,6 +169,8 @@ namespace Numian
         public void NextState()
         {
             turnStateMachine.NextState();
+            CleanWorld();
+            UpdateWorld();
         }
     }
 }

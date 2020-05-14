@@ -6,6 +6,8 @@ namespace Numian
     public class BattleCharacterController : MonoBehaviour, DamageableInterface
     {
         [SerializeField]
+        private Numian.CharacterPreset characterPreset;
+        [SerializeField]
         private CharacterData data;
         private Animator animator;
         [SerializeField]
@@ -17,16 +19,12 @@ namespace Numian
         [SerializeField]
         private Stances currentStance = Stances.MiddleStance;
 
+        public delegate void PlayerHasAttackedEvent();
+        public event PlayerHasAttackedEvent OnCharacterHasAttacked;
+
         void Start()
         {
-            data = new CharacterDataBuilder()
-                .WithBaseAttack(10)
-                .WithBaseDefense(10)
-                .WithMaxHealth(100)
-                .WithMaxStamina(5)
-                .WithTeam(Teams.Player)
-            .Build();
-
+            data = CharacterDataFactory.GetData(characterPreset);
             animator = GetComponent<Animator>();
             if(weapon == null)
             {
@@ -67,7 +65,7 @@ namespace Numian
 
         private void SteerToWorldRight()
         {
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(0,90,0), Time.deltaTime * 30f);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(0,90,0), Time.deltaTime * 0f);
         }
 
         private void CenterForward()
@@ -103,12 +101,15 @@ namespace Numian
             weapon.SetDamageActive();
             data.currentStamina -= 1;
             animator.Play(s);
+            if(OnCharacterHasAttacked != null)
+                OnCharacterHasAttacked();
         }
         public void Rest()
         {
             data.currentStamina = data.maxStamina;
         }
         public CharacterData GetData() => data;
+        public Stances GetStance() => currentStance;
         public bool HasMoved() => hasMoved;
         public void ResetMove() => hasMoved = false;
 
@@ -125,10 +126,10 @@ namespace Numian
             data.currentStamina -= 1;
         }
 
-        public void ReceiveDamage(int attackValue, Stances enemyStance)
+        public void ReceiveDamage(AttackData data)
         {
-            int damage = attackValue;
-            if(IsWeakTowardsStance(enemyStance))
+            int damage = data.GetAttackValue();
+            if(IsWeakTowardsStance(data.GetStance()))
                 damage = damage * 2;
             ReceiveDamage(damage);
         }

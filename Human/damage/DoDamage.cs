@@ -1,43 +1,46 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class DoDamage : MonoBehaviour
+namespace Numian
 {
-    private bool damageActive;
-    private int damageValue;
-    private Cooldown cooldown;
-
-    void Start()
+    public class DoDamage : MonoBehaviour
     {
-        cooldown = new SimpleCooldown(0.4f);
-    }
+        private bool damageActive;
+        private int damageValue;
+        private Cooldown cooldown;
+        [SerializeField]
+        private BattleCharacterController controller;
 
-    // Update is called once per frame
-    void Update()
-    {
-        cooldown.Update();
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-
-        if(other.tag.Equals("Damageable") && cooldown.IsAvailable() && damageActive)
+        void Start()
         {
-            other.gameObject.SendMessage("ReceiveDamage", damageValue);
-            cooldown.Heat();
-            damageActive = false;
+            cooldown = new SimpleCooldown(0.4f);
         }
-    }
 
-    public void SetDamageValue(int v)
-    {
-        damageValue = v;
-    }
-    public void SetDamageActive()
-    {
-        damageActive = true;
+        // Update is called once per frame
+        void Update()
+        {
+            cooldown.Update();
+        }
+
+        void OnTriggerEnter(Collider other)
+        {
+
+            if (other.tag.Equals("Damageable") && cooldown.IsAvailable() && damageActive)
+            {
+                other.gameObject.SendMessage("ReceiveDamage", new AttackData(damageValue, controller.GetStance()));
+                cooldown.Heat();
+                damageActive = false;
+            }
+        }
+
+        public void SetDamageValue(int v)
+        {
+            damageValue = v;
+        }
+        public void SetDamageActive()
+        {
+            damageActive = true;
+        }
+
     }
 
 }

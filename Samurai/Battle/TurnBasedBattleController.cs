@@ -69,11 +69,12 @@ namespace Numian
 
     public class NextStateAfterCooldown : Cooldown
     {
-        private Cooldown internalCooldown = new SimpleCooldown(0.3f);
+        private Cooldown internalCooldown;
         private TurnBasedBattleController turnBasedBattleController;
 
         public NextStateAfterCooldown(TurnBasedBattleController t)
         {
+            internalCooldown = new SimpleCooldown(0.3f);
             turnBasedBattleController = t;
         }
 
@@ -115,9 +116,15 @@ namespace Numian
         void Update()
         {
             if(upkeepCooldown != null)
+            {
                 upkeepCooldown.Update();
                 if(upkeepCooldown.IsAvailable())
+                {
                     upkeepCooldown = null;
+                }
+
+            }
+
         }
 
         void UpdateWorld()

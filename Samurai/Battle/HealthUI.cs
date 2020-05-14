@@ -12,8 +12,9 @@ namespace Numian
         private float bloodSpeed;
         void Start()
         {
-            current.fillAmount = GetCurrentPercentageHealth();
+            current.fillAmount = 1f;
             blood.fillAmount = current.fillAmount;
+
         }
 
         void Update()

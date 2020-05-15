@@ -5,6 +5,7 @@ namespace Numian
         ActionButton,
         UI,
         Damageable,
-        BattleController
+        BattleController,
+        PlayerTeam
     }
 }

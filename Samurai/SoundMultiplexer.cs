@@ -3,16 +3,15 @@ using UnityEngine;
 
 namespace Numian
 {
+    [RequireComponent(typeof(AudioSource))]
     public class SoundMultiplexer : MonoBehaviour
     {
-        private AudioSource[] audios;
+        [SerializeField]
+        private AudioClip[] audios;
+        private AudioSource audioSource;
         void Start()
         {
-            audios = new AudioSource[transform.childCount];
-            for (int i = 0; i < transform.childCount; i++)
-            {
-                audios[i] = transform.GetChild(i).GetComponent<AudioSource>();
-            }
+            audioSource = GetComponent<AudioSource>();
         }
 
         // Update is called once per frame
@@ -23,10 +22,11 @@ namespace Numian
 
         public void Play()
         {
-            int r = (int)UnityEngine.Random.Range(0, transform.childCount);
-            if (!audios[r].isPlaying)
+            int r = (int)UnityEngine.Random.Range(0, audios.Length);
+            if (!audioSource.isPlaying)
             {
-                audios[r].Play();
+                audioSource.clip = audios[r];
+                audioSource.Play();
             }
         }
     }

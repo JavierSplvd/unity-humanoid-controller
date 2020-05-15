@@ -18,9 +18,14 @@ namespace Numian
         private DoDamage weapon;
         [SerializeField]
         private Stances currentStance = Stances.MiddleStance;
+        [SerializeField]
+        private Vector3 steerDirection;
 
         public delegate void PlayerHasAttackedEvent();
         public event PlayerHasAttackedEvent OnCharacterHasAttacked;
+
+        public delegate void CharacterHasRested();
+        public event CharacterHasRested OnCharacterHasRested;
 
         void Start()
         {
@@ -38,8 +43,8 @@ namespace Numian
 
         void Update()
         {
-            HorizontalMove();
-            SteerToWorldRight();
+            //HorizontalMove();
+            Steer();
             CenterForward();
         }
 
@@ -63,9 +68,9 @@ namespace Numian
             }
         }
 
-        private void SteerToWorldRight()
+        private void Steer()
         {
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(0,90,0), Time.deltaTime * 0f);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(Vector3.forward, steerDirection), Time.deltaTime * 0f);
         }
 
         private void CenterForward()
@@ -107,11 +112,14 @@ namespace Numian
         public void Rest()
         {
             data.currentStamina = data.maxStamina;
+            if(OnCharacterHasRested != null)
+                OnCharacterHasRested();
         }
         public CharacterData GetData() => data;
         public Stances GetStance() => currentStance;
         public bool HasMoved() => hasMoved;
         public void ResetMove() => hasMoved = false;
+        public void CantMove() => hasMoved = true;
 
         public void ReceiveDamage(int attackValue)
         {

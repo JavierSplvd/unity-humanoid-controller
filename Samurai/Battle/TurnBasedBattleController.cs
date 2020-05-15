@@ -91,7 +91,7 @@ namespace Numian
         public override void Update()
         {
             internalCooldown.Update();
-            if(IsAvailable())
+            if (IsAvailable())
                 turnBasedBattleController.NextState();
         }
     }
@@ -104,6 +104,17 @@ namespace Numian
         [SerializeField]
         private GameObject[] actionButtons;
         private Cooldown upkeepCooldown;
+
+        public delegate void EnemyUpkeep();
+        public event EnemyUpkeep OnEnemyUpkeep;
+        public delegate void EnemyEarlyMove();
+        public event EnemyEarlyMove OnEnemyEarlyMove;
+        public delegate void EnemyAttack();
+        public event EnemyAttack OnEnemyAttack;
+        public delegate void EnemyLateMove();
+        public event EnemyLateMove OnEnemyLateMove;
+        public delegate void EnemyCleanup();
+        public event EnemyCleanup OnEnemyCleanup;
         // Start is called before the first frame update
         void Start()
         {
@@ -115,16 +126,16 @@ namespace Numian
 
         void Update()
         {
-            if(upkeepCooldown != null)
+            if (upkeepCooldown != null)
             {
                 upkeepCooldown.Update();
-                if(upkeepCooldown.IsAvailable())
+                if (upkeepCooldown.IsAvailable())
                 {
                     upkeepCooldown = null;
                 }
 
             }
-
+            UpdateWorld();
         }
 
         void UpdateWorld()
@@ -159,7 +170,7 @@ namespace Numian
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.EarlyMove))
             {
-                ActivatePlayerMovement();                
+                ActivatePlayerMovement();
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.Action))
             {
@@ -167,7 +178,7 @@ namespace Numian
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.LateMove))
             {
-                if(playerCharController.HasMoved())
+                if (playerCharController.HasMoved())
                     NextState();
                 else
                     ActivatePlayerMovement();
@@ -209,21 +220,47 @@ namespace Numian
 
         private void EnemyTurn()
         {
-
+            if (turnStateMachine.GetState().Equals(BattleStates.Upkeep))
+            {
+                if(OnEnemyCleanup != null)
+                    OnEnemyCleanup();
+            }
+            else if (turnStateMachine.GetState().Equals(BattleStates.EarlyMove))
+            {
+                if(OnEnemyEarlyMove != null)
+                    OnEnemyEarlyMove();
+            }
+            else if (turnStateMachine.GetState().Equals(BattleStates.Action))
+            {
+                if(OnEnemyAttack != null)
+                    OnEnemyAttack();
+            }
+            else if (turnStateMachine.GetState().Equals(BattleStates.LateMove))
+            {
+                if(OnEnemyLateMove != null)
+                    OnEnemyLateMove();
+            }
+            else if (turnStateMachine.GetState().Equals(BattleStates.Cleanup))
+            {
+                if(OnEnemyUpkeep != null)
+                    OnEnemyUpkeep();
+            }
         }
 
         public void NextState()
         {
             turnStateMachine.NextState();
             CleanWorld();
-            UpdateWorld();
+            // UpdateWorld();
         }
 
-        public BattleStates GetState(){
+        public BattleStates GetState()
+        {
             return turnStateMachine.GetState();
         }
 
-        public Teams GetTeam(){
+        public Teams GetTeam()
+        {
             return turnStateMachine.GetTeam();
         }
     }

@@ -50,6 +50,7 @@ public class GPUSpawner : MonoBehaviour
     [Tooltip("Capa de los objetos donde se puede ajustar el pie")]
     public LayerMask RayMask;
     RaycastHit hit;
+    public bool rayMustHit;
 
     private List<ObjData> pool = new List<ObjData>();
 
@@ -146,6 +147,10 @@ public class GPUSpawner : MonoBehaviour
                 if (Physics.Raycast(modPos + Vector3.up, Vector3.down, out hit, 2, RayMask)) //Lanzamos raycast hacia abajo
                 {
                     modPos = hit.point;
+                }
+                else if(rayMustHit)
+                {
+                    continue;
                 }
                 pool.Add(new ObjData(modPos, randomScale));
             }

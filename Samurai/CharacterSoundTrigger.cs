@@ -13,6 +13,7 @@ namespace Numian
         {
             soundMultiplexer = GetComponent<SoundMultiplexer>();
             controller.OnCharacterHasAttacked += soundMultiplexer.Play;
+            controller.OnCharacterHasRested += soundMultiplexer.Play;
         }
 
     }

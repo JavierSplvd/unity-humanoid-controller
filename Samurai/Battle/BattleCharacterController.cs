@@ -19,7 +19,7 @@ namespace Numian
         [SerializeField]
         private Stances currentStance = Stances.MiddleStance;
         [SerializeField]
-        private Vector3 steerDirection;
+        private Vector3 steerEuler;
 
         public delegate void PlayerHasAttackedEvent();
         public event PlayerHasAttackedEvent OnCharacterHasAttacked;
@@ -70,7 +70,7 @@ namespace Numian
 
         private void Steer()
         {
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(Vector3.forward, steerDirection), Time.deltaTime * 0f);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(steerEuler.x, steerEuler.y, steerEuler.z), Time.deltaTime * 0f);
         }
 
         private void CenterForward()

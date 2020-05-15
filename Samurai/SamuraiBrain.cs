@@ -61,7 +61,7 @@ namespace Numian
 
         private void EarlyMove()
         {
-            if (DistanceToTarget() > 2f)
+            if (DistanceToTarget() > 1.5f)
             {
                 movementSpring.SetX0(1f);
                 character.CantMove();

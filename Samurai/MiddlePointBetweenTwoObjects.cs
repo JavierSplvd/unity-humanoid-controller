@@ -7,6 +7,10 @@ public class MiddlePointBetweenTwoObjects : MonoBehaviour
 {
     [SerializeField]
     private GameObject object1, object2;
+    [SerializeField]
+    private float speed = 10f;
+
+    private Vector3 targetPos;
     // Start is called before the first frame update
     void Start()
     {
@@ -17,6 +21,7 @@ public class MiddlePointBetweenTwoObjects : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = (object1.transform.position + object2.transform.position) * 0.5f;
+        targetPos = (object1.transform.position + object2.transform.position) * 0.5f;
+        transform.position = Vector3.LerpUnclamped(transform.position, targetPos,  speed * Time.deltaTime);
     }
 }

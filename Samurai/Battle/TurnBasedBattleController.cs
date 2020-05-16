@@ -134,6 +134,7 @@ namespace Numian
         [SerializeField]
         private GameObject[] actionButtons;
         private Cooldown upkeepCooldown;
+        private Cooldown movementCooldown;
 
 
         // Start is called before the first frame update
@@ -143,11 +144,16 @@ namespace Numian
             actionButtons = GameObject.FindGameObjectsWithTag("actionButton");
             CleanWorld();
             DoDuringTurns();
+            movementCooldown = new SimpleCooldown(0.4f);
+
+            turnStateMachine.OnEnemyEarlyMove += ResetMovementCooldown;
+            turnStateMachine.OnEnemyLateMove += ResetMovementCooldown;
         }
 
         void Update()
         {
             DoDuringTurns();
+            movementCooldown.Update();
         }
 
         void DoDuringTurns()
@@ -168,7 +174,6 @@ namespace Numian
 
         private void CleanWorld()
         {
-            DeactivatePlayerMovement();
             DeactivateActionSelection();
         }
 
@@ -196,6 +201,7 @@ namespace Numian
             {
                 ActivatePlayerMovement();
                 ActivateEnemyMovement();
+                NextStateIfStatic();
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.Action))
             {
@@ -206,11 +212,21 @@ namespace Numian
             {
                 ActivatePlayerMovement();
                 ActivateEnemyMovement();
+                NextStateIfStatic();
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.Cleanup))
             {
                 NextState();
             }
+        }
+
+        private void NextStateIfStatic()
+        {
+            Debug.Log("Move player: "+playerCharController.IsMoving());
+            Debug.Log("Move enemy: "+enemyCharController.IsMoving());
+            Debug.Log("Move cooldown: "+movementCooldown.IsAvailable());
+            if(!playerCharController.IsMoving() && !enemyCharController.IsMoving() && movementCooldown.IsAvailable())
+                NextState();   
         }
 
         private void ActivateActionSelection()
@@ -245,11 +261,6 @@ namespace Numian
             enemyCharController.MoveRestPosition();
         }
 
-        private void DeactivatePlayerMovement()
-        {
-            playerCharController.SetHorizontalMovement(false);
-        }
-
         private void ResetPlayer()
         {
             playerCharController.ResetMove();
@@ -257,6 +268,7 @@ namespace Numian
 
         private void EnemyTurn()
         {
+            NextState();
             if (turnStateMachine.GetState().Equals(BattleStates.Upkeep))
             {
 
@@ -305,6 +317,11 @@ namespace Numian
             return turnStateMachine.GetTeam();
         }
         public TurnStateMachine GetStateMachine() => turnStateMachine;
+
+        private void ResetMovementCooldown()
+        {
+            movementCooldown.Heat();
+        }
     }
 }
 

@@ -50,7 +50,6 @@ namespace Numian
 
         void Update()
         {
-            //HorizontalMove();
             Steer();
             CenterForward();
             if (data.currentHealth <= 0)
@@ -82,26 +81,6 @@ namespace Numian
             return Vector3.Distance(restPosition.position, transform.position);
         }
 
-        private void HorizontalMove()
-        {
-            // Only run this if the character is walking or idle, that way
-            if (animator.GetCurrentAnimatorStateInfo(0).IsName("Walk") || animator.GetCurrentAnimatorStateInfo(0).IsName("Idle"))
-            {
-                float h = Input.GetAxis("Horizontal");
-                animator.SetFloat("forward", h);
-                if (Mathf.Abs(h) > 0.1 && horizontalMovement)
-                {
-                    animator.Play("Walk");
-                    hasMoved = true;
-                }
-                else
-                {
-                    animator.Play("Idle");
-                }
-
-            }
-        }
-
         private void Steer()
         {
             transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(steerEuler.x, steerEuler.y, steerEuler.z), Time.deltaTime * 0f);
@@ -114,14 +93,9 @@ namespace Numian
             transform.position = Vector3.Lerp(transform.position, curatedPos, Time.deltaTime * 0.3f);
         }
 
-        public void SetHorizontalMovement(bool b)
-        {
-            horizontalMovement = b;
-        }
-
         public void Attack()
         {
-            switch((int) UnityEngine.Random.Range(0,2.99999f))
+            switch((int) UnityEngine.Random.Range(0,1.99999f))
             {
                 case 0:
                     AttackAirStance();
@@ -207,6 +181,12 @@ namespace Numian
             if (targetStance.Equals(Stances.LowStance) && currentStance.Equals(Stances.HighStance))
                 return true;
             return false;
+        }
+
+        public bool IsMoving()
+        {
+            Debug.Log((int) (100 * animator.GetFloat("forward")));
+            return (int) (100 * animator.GetFloat("forward")) != 0f;
         }
     }
 }

@@ -69,8 +69,7 @@ namespace Numian
             randomWords.Add(shuffleWords[0]);
             randomWords.Add(shuffleWords[1]);
             randomWords.Add(w);
-            Debug.Log(randomWords[0] + " " + randomWords[1] + " " + randomWords[2]);
-            return randomWords.ToList();
+            return Shuffle(randomWords.ToList());
         }
         public string GetKanji(Word w)
         {

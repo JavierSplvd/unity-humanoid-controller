@@ -15,6 +15,7 @@ namespace Numian
         private Animator animator;
         private GameObject target;
         private Spring movementSpring;
+        private int attackCounter = 0;
         void Start()
         {
             animator = GetComponent<Animator>();
@@ -24,11 +25,11 @@ namespace Numian
                 .FindGameObjectWithTag(GameObjectTags.BattleController.ToString())
             .GetComponent<TurnBasedBattleController>();
             character = GetComponent<BattleCharacterController>();
-            controller.OnEnemyUpkeep += Upkeep;
-            controller.OnEnemyEarlyMove += EarlyMove;
-            controller.OnEnemyAttack += Attack;
-            controller.OnEnemyLateMove += LateMove;
-            controller.OnEnemyCleanup += Cleanup;
+            controller.GetStateMachine().OnEnemyUpkeep += Upkeep;
+            controller.GetStateMachine().OnEnemyEarlyMove += EarlyMove;
+            controller.GetStateMachine().OnEnemyAction += Attack;
+            controller.GetStateMachine().OnEnemyLateMove += LateMove;
+            controller.GetStateMachine().OnEnemyCleanup += Cleanup;
 
             movementSpring = new Spring(50f, 1, 0);
 
@@ -55,13 +56,22 @@ namespace Numian
 
         private void Attack()
         {
-            character.AttackMountainStance();
+            if (attackCounter < 3)
+                character.AttackMountainStance();
+            else if (attackCounter < 6)
+                character.AttackAirStance();
+            else if (attackCounter < 9)
+                character.AttackSeaStance();
+            if(attackCounter >= 9)
+                attackCounter = 0;
+            else 
+                attackCounter++;
             controller.NextState();
         }
 
         private void EarlyMove()
         {
-            if (DistanceToTarget() > 1.5f)
+            if (DistanceToTarget() > 1.8f)
             {
                 movementSpring.SetX0(1f);
                 character.CantMove();
@@ -77,6 +87,7 @@ namespace Numian
         private void Upkeep()
         {
             character.ResetMove();
+            controller.NextState();
         }
 
         private float DistanceToTarget()

@@ -1,18 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class CharacterHurtTrigger : MonoBehaviour
+namespace Numian
 {
-    // Start is called before the first frame update
-    void Start()
+    [RequireComponent(typeof(SoundMultiplexer))]
+    public class CharacterHurtTrigger : MonoBehaviour
     {
-        
-    }
+        [SerializeField]
+        private BattleCharacterController controller;
+        private SoundMultiplexer soundMultiplexer;
+        void Start()
+        {
+            soundMultiplexer = GetComponent<SoundMultiplexer>();
+            controller.OnCharacterIsHurted += soundMultiplexer.Play;
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

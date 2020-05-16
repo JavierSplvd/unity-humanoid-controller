@@ -16,6 +16,25 @@ namespace Numian
         private List<Teams> teams;
         private List<BattleStates> states;
 
+
+        public delegate void EnemyUpkeep();
+        public event EnemyUpkeep OnEnemyUpkeep;
+        public delegate void EnemyEarlyMove();
+        public event EnemyEarlyMove OnEnemyEarlyMove;
+        public delegate void EnemyAttack();
+        public event EnemyAttack OnEnemyAction;
+        public delegate void EnemyLateMove();
+        public event EnemyLateMove OnEnemyLateMove;
+        public delegate void EnemyCleanup();
+        public event EnemyCleanup OnEnemyCleanup;
+
+        public delegate void PlayerAction();
+        public event PlayerAction OnPlayerAction;
+        public delegate void PlayerLateMovement();
+        public event PlayerLateMovement OnPlayerLateMovement;
+        public delegate void PlayerUpkeep();
+        public event PlayerUpkeep OnPlayerUpkeep;
+
         public TurnStateMachine()
         {
             teams = new List<Teams>();
@@ -36,6 +55,46 @@ namespace Numian
             currentState = NextOnTheList(currentState, states);
             if (currentState.Equals(states[0]))
                 NextTeam();
+
+            if (currentTeam.Equals(Teams.Player))
+            {
+                if (currentState.Equals(BattleStates.Upkeep) && OnPlayerUpkeep != null)
+                {
+                    OnPlayerUpkeep();
+                }
+                if (currentState.Equals(BattleStates.LateMove) && OnPlayerLateMovement != null)
+                {
+                    OnPlayerLateMovement();
+                }
+                if (currentState.Equals(BattleStates.Action) && OnPlayerAction != null)
+                {
+                    OnPlayerAction();
+                }
+            }
+
+            if (currentTeam.Equals(Teams.Enemy))
+            {
+                if (currentState.Equals(BattleStates.Upkeep) && OnEnemyUpkeep != null)
+                {
+                    OnEnemyUpkeep();
+                }
+                if (currentState.Equals(BattleStates.EarlyMove) && OnEnemyEarlyMove != null)
+                {
+                    OnEnemyEarlyMove();
+                }
+                if (currentState.Equals(BattleStates.Action) && OnEnemyAction != null)
+                {
+                    OnEnemyAction();
+                }
+                if (currentState.Equals(BattleStates.LateMove) && OnEnemyLateMove != null)
+                {
+                    OnEnemyLateMove();
+                }
+                if (currentState.Equals(BattleStates.Cleanup) && OnEnemyCleanup != null)
+                {
+                    OnEnemyCleanup();
+                }
+            }
         }
 
         public void NextTeam()
@@ -66,79 +125,32 @@ namespace Numian
 
 
     }
-
-    public class NextStateAfterCooldown : Cooldown
-    {
-        private Cooldown internalCooldown;
-        private TurnBasedBattleController turnBasedBattleController;
-
-        public NextStateAfterCooldown(TurnBasedBattleController t)
-        {
-            internalCooldown = new SimpleCooldown(0.3f);
-            turnBasedBattleController = t;
-        }
-
-        public override void Heat()
-        {
-            internalCooldown.Heat();
-        }
-
-        public override bool IsAvailable()
-        {
-            return internalCooldown.IsAvailable();
-        }
-
-        public override void Update()
-        {
-            internalCooldown.Update();
-            if (IsAvailable())
-                turnBasedBattleController.NextState();
-        }
-    }
     public class TurnBasedBattleController : MonoBehaviour
     {
         [SerializeField]
         private TurnStateMachine turnStateMachine;
         [SerializeField]
-        private BattleCharacterController playerCharController;
+        private BattleCharacterController playerCharController, enemyCharController;
         [SerializeField]
         private GameObject[] actionButtons;
         private Cooldown upkeepCooldown;
 
-        public delegate void EnemyUpkeep();
-        public event EnemyUpkeep OnEnemyUpkeep;
-        public delegate void EnemyEarlyMove();
-        public event EnemyEarlyMove OnEnemyEarlyMove;
-        public delegate void EnemyAttack();
-        public event EnemyAttack OnEnemyAttack;
-        public delegate void EnemyLateMove();
-        public event EnemyLateMove OnEnemyLateMove;
-        public delegate void EnemyCleanup();
-        public event EnemyCleanup OnEnemyCleanup;
+
         // Start is called before the first frame update
         void Start()
         {
             turnStateMachine = new TurnStateMachine();
             actionButtons = GameObject.FindGameObjectsWithTag("actionButton");
             CleanWorld();
-            UpdateWorld();
+            DoDuringTurns();
         }
 
         void Update()
         {
-            if (upkeepCooldown != null)
-            {
-                upkeepCooldown.Update();
-                if (upkeepCooldown.IsAvailable())
-                {
-                    upkeepCooldown = null;
-                }
-
-            }
-            UpdateWorld();
+            DoDuringTurns();
         }
 
-        void UpdateWorld()
+        void DoDuringTurns()
         {
             switch (turnStateMachine.GetTeam())
             {
@@ -164,37 +176,57 @@ namespace Numian
         {
             if (turnStateMachine.GetState().Equals(BattleStates.Upkeep))
             {
-                ResetPlayer();
-                upkeepCooldown = new NextStateAfterCooldown(this);
-                upkeepCooldown.Heat();
+                // On enter
+                if (upkeepCooldown == null)
+                {
+                    upkeepCooldown = new SimpleCooldown(0.3f);
+                    ResetPlayer();
+                    upkeepCooldown.Heat();
+                }
+                // During
+                upkeepCooldown.Update();
+                // On exit
+                if (upkeepCooldown.IsAvailable())
+                {
+                    upkeepCooldown = null;
+                    NextState();
+                }
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.EarlyMove))
             {
                 ActivatePlayerMovement();
+                ActivateEnemyMovement();
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.Action))
             {
                 ActivateActionSelection();
+
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.LateMove))
             {
-                if (playerCharController.HasMoved())
-                    NextState();
-                else
-                    ActivatePlayerMovement();
+                ActivatePlayerMovement();
+                ActivateEnemyMovement();
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.Cleanup))
             {
-
+                NextState();
             }
         }
 
         private void ActivateActionSelection()
         {
-            foreach (GameObject g in actionButtons)
+            if (playerCharController.GetData().currentStamina == 0)
             {
-                g.SetActive(true);
+                actionButtons[actionButtons.Length - 1].SetActive(true);
             }
+            else
+            {
+                foreach (GameObject g in actionButtons)
+                {
+                    g.SetActive(true);
+                }
+            }
+
         }
         private void DeactivateActionSelection()
         {
@@ -205,7 +237,12 @@ namespace Numian
         }
         private void ActivatePlayerMovement()
         {
-            playerCharController.SetHorizontalMovement(true);
+            playerCharController.MoveRestPosition();
+        }
+
+        private void ActivateEnemyMovement()
+        {
+            enemyCharController.MoveRestPosition();
         }
 
         private void DeactivatePlayerMovement()
@@ -222,29 +259,33 @@ namespace Numian
         {
             if (turnStateMachine.GetState().Equals(BattleStates.Upkeep))
             {
-                if(OnEnemyCleanup != null)
-                    OnEnemyCleanup();
+
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.EarlyMove))
             {
-                if(OnEnemyEarlyMove != null)
-                    OnEnemyEarlyMove();
+
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.Action))
             {
-                if(OnEnemyAttack != null)
-                    OnEnemyAttack();
+
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.LateMove))
             {
-                if(OnEnemyLateMove != null)
-                    OnEnemyLateMove();
+
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.Cleanup))
             {
-                if(OnEnemyUpkeep != null)
-                    OnEnemyUpkeep();
+
             }
+        }
+        
+        public void PlayerAttacks()
+        {
+            playerCharController.Attack();
+        }
+        public void EnemyAttacks()
+        {
+            enemyCharController.Attack();
         }
 
         public void NextState()
@@ -263,6 +304,7 @@ namespace Numian
         {
             return turnStateMachine.GetTeam();
         }
+        public TurnStateMachine GetStateMachine() => turnStateMachine;
     }
 }
 

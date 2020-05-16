@@ -20,6 +20,9 @@ namespace Numian
         private Stances currentStance = Stances.MiddleStance;
         [SerializeField]
         private Vector3 steerEuler;
+        [SerializeField]
+        private Transform restPosition;
+        private Spring movementSpring;
 
         public delegate void PlayerHasAttackedEvent();
         public event PlayerHasAttackedEvent OnCharacterHasAttacked;
@@ -27,11 +30,15 @@ namespace Numian
         public delegate void CharacterHasRested();
         public event CharacterHasRested OnCharacterHasRested;
 
+        public delegate void CharacterIsHurted();
+        public event CharacterIsHurted OnCharacterIsHurted;
+
         void Start()
         {
+            movementSpring = new Spring(20, 1, 0);
             data = CharacterDataFactory.GetData(characterPreset);
             animator = GetComponent<Animator>();
-            if(weapon == null)
+            if (weapon == null)
             {
                 throw new MissingReferenceException("Missing weapon to do damage.");
             }
@@ -46,6 +53,33 @@ namespace Numian
             //HorizontalMove();
             Steer();
             CenterForward();
+            if (data.currentHealth <= 0)
+                animator.SetTrigger("die");
+        }
+
+        public void MoveRestPosition()
+        {
+            if (DistanceToTarget() > 0.3f)
+            {
+                float x = transform.forward.x * (restPosition.position.x - transform.position.x);
+                if(x>0)
+                    x = 1;
+                else
+                    x = -1;
+                movementSpring.SetX0(x);
+            }
+            else
+            {
+                movementSpring.SetX0(0f);
+            }
+            animator.SetFloat("forward", movementSpring.GetX());
+            movementSpring.Update(Time.deltaTime);
+
+        }
+
+        private float DistanceToTarget()
+        {
+            return Vector3.Distance(restPosition.position, transform.position);
         }
 
         private void HorizontalMove()
@@ -56,7 +90,7 @@ namespace Numian
                 float h = Input.GetAxis("Horizontal");
                 animator.SetFloat("forward", h);
                 if (Mathf.Abs(h) > 0.1 && horizontalMovement)
-                {                    
+                {
                     animator.Play("Walk");
                     hasMoved = true;
                 }
@@ -85,17 +119,33 @@ namespace Numian
             horizontalMovement = b;
         }
 
-        public void AttackAirStance()
+        public void Attack()
+        {
+            switch((int) UnityEngine.Random.Range(0,2.99999f))
+            {
+                case 0:
+                    AttackAirStance();
+                    break;
+                case 1:
+                    AttackMountainStance();
+                    break;
+                case 2:
+                    AttackSeaStance();
+                    break;
+            }   
+        }
+
+        void AttackAirStance()
         {
             currentStance = Stances.HighStance;
             DoAttackStance("AirAttack");
         }
-        public void AttackMountainStance()
+        void AttackMountainStance()
         {
             currentStance = Stances.MiddleStance;
             DoAttackStance("MountainAttack");
         }
-        public void AttackSeaStance()
+        void AttackSeaStance()
         {
             currentStance = Stances.LowStance;
             DoAttackStance("SeaAttack");
@@ -106,13 +156,14 @@ namespace Numian
             weapon.SetDamageActive();
             data.currentStamina -= 1;
             animator.Play(s);
-            if(OnCharacterHasAttacked != null)
+            if (OnCharacterHasAttacked != null)
                 OnCharacterHasAttacked();
+
         }
         public void Rest()
         {
             data.currentStamina = data.maxStamina;
-            if(OnCharacterHasRested != null)
+            if (OnCharacterHasRested != null)
                 OnCharacterHasRested();
         }
         public CharacterData GetData() => data;
@@ -123,9 +174,11 @@ namespace Numian
 
         public void ReceiveDamage(int attackValue)
         {
-            if(isGuarding)
+            if (isGuarding)
+            {
                 attackValue = attackValue / 2;
                 ConsumeGuardStamina();
+            }
             data.currentHealth -= attackValue;
         }
 
@@ -137,18 +190,21 @@ namespace Numian
         public void ReceiveDamage(AttackData data)
         {
             int damage = data.GetAttackValue();
-            if(IsWeakTowardsStance(data.GetStance()))
+            if (IsWeakTowardsStance(data.GetStance()))
                 damage = damage * 2;
             ReceiveDamage(damage);
+            if (OnCharacterIsHurted != null)
+                OnCharacterIsHurted();
+            animator.SetTrigger("hit");
         }
 
         private bool IsWeakTowardsStance(Stances targetStance)
         {
-            if(targetStance.Equals(Stances.HighStance) && currentStance.Equals(Stances.MiddleStance))
+            if (targetStance.Equals(Stances.HighStance) && currentStance.Equals(Stances.MiddleStance))
                 return true;
-            if(targetStance.Equals(Stances.MiddleStance) && currentStance.Equals(Stances.LowStance))
+            if (targetStance.Equals(Stances.MiddleStance) && currentStance.Equals(Stances.LowStance))
                 return true;
-            if(targetStance.Equals(Stances.LowStance) && currentStance.Equals(Stances.HighStance))
+            if (targetStance.Equals(Stances.LowStance) && currentStance.Equals(Stances.HighStance))
                 return true;
             return false;
         }

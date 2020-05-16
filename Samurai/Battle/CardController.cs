@@ -184,6 +184,7 @@ namespace Numian
                 controller.PlayerAttacks();
             else
                 controller.EnemyAttacks();
+            controller.NextState();
         }
     }
 }

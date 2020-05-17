@@ -17,7 +17,7 @@ namespace Numian
             if (preset.Equals(CharacterPreset.Samurai))
             {
                 data = new CharacterDataBuilder()
-                                .WithBaseAttack(10)
+                                .WithBaseAttack(5)
                                 .WithBaseDefense(10)
                                 .WithMaxHealth(100)
                                 .WithMaxStamina(5)

@@ -38,7 +38,6 @@ namespace Numian
         {
             if(OnClick != null)
                 OnClick(word);
-            Debug.Log("Click on " + word);
         }
 
         public Word GetWord() => word;

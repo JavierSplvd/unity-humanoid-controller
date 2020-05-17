@@ -222,9 +222,6 @@ namespace Numian
 
         private void NextStateIfStatic()
         {
-            Debug.Log("Move player: "+playerCharController.IsMoving());
-            Debug.Log("Move enemy: "+enemyCharController.IsMoving());
-            Debug.Log("Move cooldown: "+movementCooldown.IsAvailable());
             if(!playerCharController.IsMoving() && !enemyCharController.IsMoving() && movementCooldown.IsAvailable())
                 NextState();   
         }

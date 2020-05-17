@@ -26,7 +26,6 @@ namespace Numian
                 newList[k] = newList[n];
                 newList[n] = value;
             }
-            Debug.Log(newList[0] + " " + newList[1]);
             return newList;
         }
 
@@ -98,6 +97,11 @@ namespace Numian
         [SerializeField]
         private Spring verticalPosSpring;
         private RectTransform rectTransform;
+
+        public delegate void CorrectAnswer();
+        public event CorrectAnswer OnCorrectAnswer;
+        public delegate void WrongAnswer();
+        public event WrongAnswer OnWrongAnswer;
         // Start is called before the first frame update
         void Start()
         {
@@ -134,7 +138,7 @@ namespace Numian
             controller.GetStateMachine().OnPlayerUpkeep += HideCards;
             controller.GetStateMachine().OnPlayerLateMovement += HideCards;
             // Subscribe to answers events;
-            foreach(Card c in answers)
+            foreach (Card c in answers)
             {
                 c.OnClick += CheckAnswer;
             }
@@ -151,10 +155,8 @@ namespace Numian
 
         void ShuffleCards()
         {
-            Debug.Log("Shuffle");
             Word targetWord = dictionary.GetRandomWord();
             List<Word> possibleAnswers = dictionary.GetThreeRandomWordsFor(targetWord);
-            Debug.Log(possibleAnswers.Count);
 
             question.UpdateInfo(targetWord, dictionary.GetKanji(targetWord));
             for (int i = 0; i < 3; i++)
@@ -165,24 +167,29 @@ namespace Numian
 
         void ShowCards()
         {
-            Debug.Log("Show");
             verticalPosSpring.SetX0(0);
         }
 
         void HideCards()
         {
-            Debug.Log("Hide");
             verticalPosSpring.SetX0(-2000);
         }
 
         void CheckAnswer(Word answer)
         {
             bool response = answer.Equals(question.GetWord());
-            Debug.Log("Response was "+ response);
-            if(response)
+            if (response)
+            {
                 controller.PlayerAttacks();
+                if (OnCorrectAnswer != null)
+                    OnCorrectAnswer();
+            }
             else
+            {
                 controller.EnemyAttacks();
+                if (OnWrongAnswer != null)
+                    OnWrongAnswer();
+            }
             controller.NextState();
         }
     }

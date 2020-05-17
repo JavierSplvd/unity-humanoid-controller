@@ -30,14 +30,12 @@ namespace Numian
         // Update is called once per frame
         void Update()
         {
-            Debug.Log("Volume"+ spring.GetX0());
             vignette.intensity.value = spring.GetX();
             spring.Update(Time.deltaTime);
         }
 
         void MaxVignette()
         {
-            Debug.Log("Max");
             spring.SetX0(maxVignette);
         }
 

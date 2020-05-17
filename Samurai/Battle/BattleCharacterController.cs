@@ -58,10 +58,10 @@ namespace Numian
 
         public void MoveRestPosition()
         {
-            if (DistanceToTarget() > 0.3f)
+            if (DistanceToTarget() > 0.25f)
             {
                 float x = transform.forward.x * (restPosition.position.x - transform.position.x);
-                if(x>0)
+                if (x > 0)
                     x = 1;
                 else
                     x = -1;
@@ -95,7 +95,7 @@ namespace Numian
 
         public void Attack()
         {
-            switch((int) UnityEngine.Random.Range(0,1.99999f))
+            switch ((int)UnityEngine.Random.Range(0, 1.99999f))
             {
                 case 0:
                     AttackAirStance();
@@ -106,7 +106,7 @@ namespace Numian
                 case 2:
                     AttackSeaStance();
                     break;
-            }   
+            }
         }
 
         void AttackAirStance()
@@ -168,7 +168,11 @@ namespace Numian
                 damage = damage * 2;
             ReceiveDamage(damage);
             if (OnCharacterIsHurted != null)
+            {
+                Debug.Log("hurted");
                 OnCharacterIsHurted();
+
+            }
             animator.SetTrigger("hit");
         }
 
@@ -185,8 +189,7 @@ namespace Numian
 
         public bool IsMoving()
         {
-            Debug.Log((int) (100 * animator.GetFloat("forward")));
-            return (int) (100 * animator.GetFloat("forward")) != 0f;
+            return (int)(100 * animator.GetFloat("forward")) != 0f;
         }
     }
 }

@@ -11,6 +11,16 @@ namespace Numian
         Seven,
         Eight,
         Nine,
-        Ten
+        Ten,
+        Hundred, // block 2
+        Thousand,
+        TenThousand,
+        Father,
+        Mother,
+        Friend,
+        Woman,
+        Man,
+        Person,
+        Child
     }
 }

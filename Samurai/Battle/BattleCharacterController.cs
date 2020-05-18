@@ -58,7 +58,7 @@ namespace Numian
 
         public void MoveRestPosition()
         {
-            if (DistanceToTarget() > 0.25f)
+            if (DistanceToTarget() > 0.3f)
             {
                 float x = transform.forward.x * (restPosition.position.x - transform.position.x);
                 if (x > 0)
@@ -190,6 +190,11 @@ namespace Numian
         public bool IsMoving()
         {
             return (int)(100 * animator.GetFloat("forward")) != 0f;
+        }
+
+        public void Stop()
+        {
+            animator.SetFloat("forward", 0f);
         }
     }
 }

@@ -45,6 +45,16 @@ namespace Numian
             AddWord(Word.Eight, "八", "HACHI", "eight");
             AddWord(Word.Nine, "九", "HACHI", "nine");
             AddWord(Word.Ten, "十", "KU", "ten");
+            AddWord(Word.Hundred, "百", "", "hundred");
+            AddWord(Word.Thousand, "千", "", "thousand");
+            AddWord(Word.TenThousand, "万", "", "ten thousand");
+            AddWord(Word.Father, "父", "", "father");
+            AddWord(Word.Mother, "母", "", "mother");
+            AddWord(Word.Friend, "友", "", "friend");
+            AddWord(Word.Woman, "女", "", "woman");
+            AddWord(Word.Man, "男", "", "man");
+            AddWord(Word.Person, "人", "", "person");
+            AddWord(Word.Child, "子", "", "child");
         }
 
         private void AddWord(Word word, string kanji, string latin, string traduction)
@@ -57,7 +67,7 @@ namespace Numian
 
         public Word GetRandomWord()
         {
-            return words[Random.Range(0, words.Count - 1)];
+            return words[Random.Range(0, words.Count)];
         }
 
         public List<Word> GetThreeRandomWordsFor(Word w)

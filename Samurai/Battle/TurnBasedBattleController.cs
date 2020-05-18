@@ -144,7 +144,7 @@ namespace Numian
             actionButtons = GameObject.FindGameObjectsWithTag("actionButton");
             CleanWorld();
             DoDuringTurns();
-            movementCooldown = new SimpleCooldown(0.4f);
+            movementCooldown = new SimpleCooldown(1.1f);
 
             turnStateMachine.OnEnemyEarlyMove += ResetMovementCooldown;
             turnStateMachine.OnEnemyLateMove += ResetMovementCooldown;
@@ -220,10 +220,19 @@ namespace Numian
             }
         }
 
+        private void StopMovementOfcharacters()
+        {
+            playerCharController.Stop();
+            enemyCharController.Stop();
+        }
+
         private void NextStateIfStatic()
         {
-            if(!playerCharController.IsMoving() && !enemyCharController.IsMoving() && movementCooldown.IsAvailable())
-                NextState();   
+            if((!playerCharController.IsMoving() && !enemyCharController.IsMoving()) && movementCooldown.IsAvailable())
+            {
+                StopMovementOfcharacters();
+                NextState();
+            }
         }
 
         private void ActivateActionSelection()
@@ -301,6 +310,7 @@ namespace Numian
         {
             turnStateMachine.NextState();
             CleanWorld();
+            movementCooldown.Heat();
             // UpdateWorld();
         }
 

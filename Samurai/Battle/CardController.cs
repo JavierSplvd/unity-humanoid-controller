@@ -11,6 +11,8 @@ namespace Numian
         private List<string> kanjis;
         private List<string> latinWords;
         private List<string> traductions;
+        private List<int> failures;
+        private List<int> success;
 
         private static Random rng = new Random();
 
@@ -28,13 +30,14 @@ namespace Numian
             }
             return newList;
         }
-
+        // https://en.wikibooks.org/wiki/JLPT_Guide/JLPT_N5_Kanji
         public WordDictionary()
         {
             words = new List<Word>();
             kanjis = new List<string>();
             latinWords = new List<string>();
             traductions = new List<string>();
+            
             AddWord(Word.One, "一", "ICHI", "one");
             AddWord(Word.Two, "二", "NI", "two");
             AddWord(Word.Three, "三", "SAN", "three");
@@ -55,6 +58,9 @@ namespace Numian
             AddWord(Word.Man, "男", "", "man");
             AddWord(Word.Person, "人", "", "person");
             AddWord(Word.Child, "子", "", "child");
+
+            failures = new List<int>(new int[words.Count]);
+            success = new List<int>(new int[words.Count]);
         }
 
         private void AddWord(Word word, string kanji, string latin, string traduction)
@@ -92,6 +98,46 @@ namespace Numian
         {
             return traductions[words.IndexOf(w)];
         }
+        public void AddFailure(Word w)
+        {
+            int index = words.IndexOf(w);
+            failures[index] += 1;
+        }
+        public void AddSuccess(Word w)
+        {
+            int index = words.IndexOf(w);
+            success[index] += 1;
+        }
+
+        public List<int> GetFailures() => failures;
+        public List<Word> GetWords() => words;
+        public List<KeyValuePair<Word, int>> GetFailuresAndWords()
+        {
+            List<KeyValuePair<Word, int>> l = new List<KeyValuePair<Word, int>>();
+            foreach(Word w in words)
+            {
+                l.Add(new KeyValuePair<Word, int>(w, failures[words.IndexOf(w)]));
+            }
+            return l;
+        }
+    }
+    public class WordStatAggregator
+    {
+        private WordDictionary wordDictionary;
+        private CardController cardController;
+        private List<KeyValuePair<Word, int>> topFailuresWords;
+        private List<int> topFailuresCount;
+        public WordStatAggregator(WordDictionary wordDictionary, CardController cardController)
+        {
+            this.wordDictionary = wordDictionary;
+            this.cardController = cardController;
+        }
+
+        public void GetTopFiveFailures()
+        {
+            List<KeyValuePair<Word, int>> failuresAndWords = wordDictionary.GetFailuresAndWords();
+            failuresAndWords.OrderByDescending(x => x.Value).ToList();
+        }
     }
     public class CardController : MonoBehaviour
     {
@@ -101,6 +147,7 @@ namespace Numian
         private Card question;
         private Transform questionParent, answerParent;
         private WordDictionary dictionary;
+        private WordStatAggregator wordStats;
 
         [SerializeField]
         private Vector2 originalPos, currentPos;
@@ -120,6 +167,7 @@ namespace Numian
             currentPos = rectTransform.localPosition;
             verticalPosSpring = new Spring(100, 1, originalPos.y);
             dictionary = new WordDictionary();
+            wordStats = new WordStatAggregator(dictionary, this);
             // Get parents
             for (int i = 0; i < transform.childCount; i++)
             {
@@ -192,15 +240,24 @@ namespace Numian
             {
                 controller.PlayerAttacks();
                 if (OnCorrectAnswer != null)
+                {
                     OnCorrectAnswer();
+                }
             }
             else
             {
                 controller.EnemyAttacks();
                 if (OnWrongAnswer != null)
+                {
                     OnWrongAnswer();
+                }
             }
             controller.NextState();
+        }
+
+        public void GetFailures()
+        {
+            wordStats.GetTopFiveFailures();
         }
     }
 }

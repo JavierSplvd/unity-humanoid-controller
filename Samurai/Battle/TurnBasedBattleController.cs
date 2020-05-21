@@ -131,8 +131,6 @@ namespace Numian
         private TurnStateMachine turnStateMachine;
         [SerializeField]
         private BattleCharacterController playerCharController, enemyCharController;
-        [SerializeField]
-        private GameObject[] actionButtons;
         private Cooldown upkeepCooldown;
         private Cooldown movementCooldown;
 
@@ -141,10 +139,8 @@ namespace Numian
         void Start()
         {
             turnStateMachine = new TurnStateMachine();
-            actionButtons = GameObject.FindGameObjectsWithTag("actionButton");
-            CleanWorld();
             DoDuringTurns();
-            movementCooldown = new SimpleCooldown(1.1f);
+            movementCooldown = new SimpleCooldown(0.4f);
 
             turnStateMachine.OnEnemyEarlyMove += ResetMovementCooldown;
             turnStateMachine.OnEnemyLateMove += ResetMovementCooldown;
@@ -172,10 +168,6 @@ namespace Numian
             }
         }
 
-        private void CleanWorld()
-        {
-            DeactivateActionSelection();
-        }
 
         private void PlayerTurn()
         {
@@ -205,7 +197,6 @@ namespace Numian
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.Action))
             {
-                ActivateActionSelection();
 
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.LateMove))
@@ -232,29 +223,6 @@ namespace Numian
             {
                 StopMovementOfcharacters();
                 NextState();
-            }
-        }
-
-        private void ActivateActionSelection()
-        {
-            if (playerCharController.GetData().currentStamina == 0)
-            {
-                actionButtons[actionButtons.Length - 1].SetActive(true);
-            }
-            else
-            {
-                foreach (GameObject g in actionButtons)
-                {
-                    g.SetActive(true);
-                }
-            }
-
-        }
-        private void DeactivateActionSelection()
-        {
-            foreach (GameObject g in actionButtons)
-            {
-                g.SetActive(false);
             }
         }
         private void ActivatePlayerMovement()
@@ -309,7 +277,6 @@ namespace Numian
         public void NextState()
         {
             turnStateMachine.NextState();
-            CleanWorld();
             movementCooldown.Heat();
             // UpdateWorld();
         }

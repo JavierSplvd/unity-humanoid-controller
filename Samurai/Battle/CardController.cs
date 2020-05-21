@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -14,7 +14,6 @@ namespace Numian
         private List<int> failures;
         private List<int> success;
 
-        private static Random rng = new Random();
 
         public List<T> Shuffle<T>(IList<T> list)
         {
@@ -23,7 +22,7 @@ namespace Numian
             while (n > 1)
             {
                 n--;
-                int k = (int)Random.Range(0, n - 0.00001f);
+                int k = (int)UnityEngine.Random.Range(0, n - 0.00001f);
                 T value = newList[k];
                 newList[k] = newList[n];
                 newList[n] = value;
@@ -73,7 +72,7 @@ namespace Numian
 
         public Word GetRandomWord()
         {
-            return words[Random.Range(0, words.Count)];
+            return words[UnityEngine.Random.Range(0, words.Count)];
         }
 
         public List<Word> GetThreeRandomWordsFor(Word w)
@@ -111,12 +110,13 @@ namespace Numian
 
         public List<int> GetFailures() => failures;
         public List<Word> GetWords() => words;
-        public List<KeyValuePair<Word, int>> GetFailuresAndWords()
+        public List<KeyValuePair<string, int>> GetFailuresAndKanjis()
         {
-            List<KeyValuePair<Word, int>> l = new List<KeyValuePair<Word, int>>();
+            List<KeyValuePair<string, int>> l = new List<KeyValuePair<string, int>>();
             foreach(Word w in words)
             {
-                l.Add(new KeyValuePair<Word, int>(w, failures[words.IndexOf(w)]));
+                int index = words.IndexOf(w);
+                l.Add(new KeyValuePair<string, int>(kanjis[index], failures[index]));
             }
             return l;
         }
@@ -133,10 +133,12 @@ namespace Numian
             this.cardController = cardController;
         }
 
-        public void GetTopFiveFailures()
+        public List<KeyValuePair<string, int>> GetTopFiveFailures()
         {
-            List<KeyValuePair<Word, int>> failuresAndWords = wordDictionary.GetFailuresAndWords();
-            failuresAndWords.OrderByDescending(x => x.Value).ToList();
+            List<KeyValuePair<string, int>> failuresAndKanjis = wordDictionary.GetFailuresAndKanjis();
+            failuresAndKanjis = failuresAndKanjis.OrderByDescending(x => x.Value).Take(5).ToList();
+            Debug.Log(String.Join("///", failuresAndKanjis));
+            return failuresAndKanjis;
         }
     }
     public class CardController : MonoBehaviour
@@ -155,10 +157,16 @@ namespace Numian
         private Spring verticalPosSpring;
         private RectTransform rectTransform;
 
+        // Stats
+        [SerializeField]
+        private Transform row1, row2, row3, row4, row5;
+
         public delegate void CorrectAnswer();
         public event CorrectAnswer OnCorrectAnswer;
         public delegate void WrongAnswer();
         public event WrongAnswer OnWrongAnswer;
+        public delegate void UpdateFailures(List<KeyValuePair<string, int>> l);
+        public event UpdateFailures OnUpdateFailures;
         // Start is called before the first frame update
         void Start()
         {
@@ -242,6 +250,7 @@ namespace Numian
                 if (OnCorrectAnswer != null)
                 {
                     OnCorrectAnswer();
+                    dictionary.AddSuccess(answer);
                 }
             }
             else
@@ -250,6 +259,7 @@ namespace Numian
                 if (OnWrongAnswer != null)
                 {
                     OnWrongAnswer();
+                    dictionary.AddFailure(answer);
                 }
             }
             controller.NextState();
@@ -257,7 +267,8 @@ namespace Numian
 
         public void GetFailures()
         {
-            wordStats.GetTopFiveFailures();
+            if(OnUpdateFailures != null)
+                OnUpdateFailures(wordStats.GetTopFiveFailures());
         }
     }
 }

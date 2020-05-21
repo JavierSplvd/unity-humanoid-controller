@@ -24,6 +24,9 @@ namespace Numian
         private Transform restPosition;
         private Spring movementSpring;
 
+        [SerializeField]
+        private float distanceToRestPos;
+
         public delegate void PlayerHasAttackedEvent();
         public event PlayerHasAttackedEvent OnCharacterHasAttacked;
 
@@ -35,7 +38,7 @@ namespace Numian
 
         void Start()
         {
-            movementSpring = new Spring(20, 1, 0);
+            movementSpring = new Spring(15, 1, 0);
             data = CharacterDataFactory.GetData(characterPreset);
             animator = GetComponent<Animator>();
             if (weapon == null)
@@ -54,6 +57,8 @@ namespace Numian
             CenterForward();
             if (data.currentHealth <= 0)
                 animator.SetTrigger("die");
+            animator.SetFloat("forward", movementSpring.GetX());
+            
         }
 
         public void MoveRestPosition()
@@ -71,14 +76,19 @@ namespace Numian
             {
                 movementSpring.SetX0(0f);
             }
-            animator.SetFloat("forward", movementSpring.GetX());
             movementSpring.Update(Time.deltaTime);
 
         }
 
         private float DistanceToTarget()
         {
-            return Vector3.Distance(restPosition.position, transform.position);
+            // Ignoring height
+            Vector3 restPositionSanitized = restPosition.position;
+            restPositionSanitized.y = 0;
+            Vector3 thisPosition = transform.position;
+            thisPosition.y = 0;
+            distanceToRestPos = Vector3.Distance(restPositionSanitized, thisPosition);
+            return distanceToRestPos;
         }
 
         private void Steer()
@@ -189,12 +199,12 @@ namespace Numian
 
         public bool IsMoving()
         {
-            return (int)(100 * animator.GetFloat("forward")) != 0f;
+            return (int)(10 * animator.GetFloat("forward")) != 0f;
         }
 
         public void Stop()
         {
-            animator.SetFloat("forward", 0f);
+            movementSpring.SetX0(0f);
         }
     }
 }

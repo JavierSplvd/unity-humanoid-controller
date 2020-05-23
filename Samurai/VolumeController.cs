@@ -9,7 +9,6 @@ namespace Numian
     [RequireComponent(typeof(Volume))]
     public class VolumeController : MonoBehaviour
     {
-        [SerializeField]
         private TurnBasedBattleController controller;
         [SerializeField]
         private float minVignette, maxVignette;
@@ -20,11 +19,15 @@ namespace Numian
         // Start is called before the first frame update
         void Start()
         {
+            Debug.Log("volume");
+            controller = GameObject
+                .FindGameObjectWithTag(GameObjectTags.BattleController.ToString())
+            .GetComponent<TurnBasedBattleController>();
             volume = GetComponent<Volume>();
             volume.profile.TryGet(out vignette);
             controller.GetStateMachine().OnPlayerAction += MaxVignette;
             controller.GetStateMachine().OnPlayerLateMovement += ReduceVignette;
-            spring = new Spring(40,1, minVignette);
+            spring = new Spring(40, 1, minVignette);
         }
 
         // Update is called once per frame
@@ -34,13 +37,15 @@ namespace Numian
             spring.Update(Time.deltaTime);
         }
 
-        void MaxVignette()
+        private void MaxVignette()
         {
+            Debug.Log("max");
             spring.SetX0(maxVignette);
         }
 
-        void ReduceVignette()
+        private void ReduceVignette()
         {
+            Debug.Log("min");
             spring.SetX0(minVignette);
         }
     }

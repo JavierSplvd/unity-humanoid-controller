@@ -139,13 +139,12 @@ namespace Numian
         public delegate void Defeat();
         public event Defeat OnDefeat;
 
-
-        // Start is called before the first frame update
-        void Start()
+        void Awake()
         {
             turnStateMachine = new TurnStateMachine();
             DoDuringTurns();
             movementCooldown = new SimpleCooldown(0.4f);
+            Debug.Log("battlecontroller");
 
             turnStateMachine.OnEnemyEarlyMove += ResetMovementCooldown;
             turnStateMachine.OnEnemyLateMove += ResetMovementCooldown;

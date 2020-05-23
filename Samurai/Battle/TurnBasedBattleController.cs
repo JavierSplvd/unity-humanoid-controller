@@ -34,6 +34,8 @@ namespace Numian
         public event PlayerLateMovement OnPlayerLateMovement;
         public delegate void PlayerUpkeep();
         public event PlayerUpkeep OnPlayerUpkeep;
+        public delegate void PlayerCleanup();
+        public event PlayerCleanup OnPlayerCleanup;
 
         public TurnStateMachine()
         {
@@ -69,6 +71,10 @@ namespace Numian
                 if (currentState.Equals(BattleStates.Action) && OnPlayerAction != null)
                 {
                     OnPlayerAction();
+                }
+                if(currentState.Equals(BattleStates.Cleanup) && OnPlayerCleanup != null)
+                {
+                    OnPlayerCleanup();
                 }
             }
 

@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Numian
 {
+    [Serializable]
     public class WordDictionary
     {
         private List<Word> words;
@@ -174,7 +175,7 @@ namespace Numian
             originalPos = rectTransform.localPosition;
             currentPos = rectTransform.localPosition;
             verticalPosSpring = new Spring(100, 1, originalPos.y);
-            dictionary = new WordDictionary();
+            dictionary = Savegame.LoadDictionary();
             wordStats = new WordStatAggregator(dictionary, this);
             // Get parents
             for (int i = 0; i < transform.childCount; i++)
@@ -203,6 +204,7 @@ namespace Numian
             controller.GetStateMachine().OnPlayerAction += ShowCards;
             controller.GetStateMachine().OnPlayerUpkeep += HideCards;
             controller.GetStateMachine().OnPlayerLateMovement += HideCards;
+            controller.GetStateMachine().OnPlayerCleanup += Save;
             // Subscribe to answers events;
             foreach (Card c in answers)
             {
@@ -269,6 +271,11 @@ namespace Numian
         {
             if(OnUpdateFailures != null)
                 OnUpdateFailures(wordStats.GetTopFiveFailures());
+        }
+
+        private void Save()
+        {
+            Savegame.SaveDictionary(dictionary);
         }
     }
 }

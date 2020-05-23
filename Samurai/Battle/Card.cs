@@ -12,7 +12,7 @@ namespace Numian
         [SerializeField]
         private Word word;
         [SerializeField]
-        private Text text;
+        private Text kanji, romaji, traduction;
 
         public delegate void Click(Word w);
         public event Click OnClick;
@@ -28,10 +28,17 @@ namespace Numian
 
         }
 
-        public void UpdateInfo(Word w, string s)
+        public void UpdateInfo(Word w, string kanji, string romaji)
         {
             word = w;
-            text.text = s;
+            this.kanji.text = kanji;
+            this.romaji.text = romaji;
+        }
+
+        public void UpdateAnswerInfo(Word word, string traduction)
+        {
+            this.word = word;
+            this.traduction.text = traduction;
         }
 
         public void OnPointerClick(PointerEventData eventData)

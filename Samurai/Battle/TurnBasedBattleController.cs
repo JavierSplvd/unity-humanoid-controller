@@ -134,6 +134,11 @@ namespace Numian
         private Cooldown upkeepCooldown;
         private Cooldown movementCooldown;
 
+        public delegate void Win();
+        public event Win OnWin;
+        public delegate void Defeat();
+        public event Defeat OnDefeat;
+
 
         // Start is called before the first frame update
         void Start()
@@ -207,7 +212,20 @@ namespace Numian
             }
             else if (turnStateMachine.GetState().Equals(BattleStates.Cleanup))
             {
-                NextState();
+                if(enemyCharController.GetData().currentHealth <= 0)
+                {
+                    if(OnWin != null)
+                        OnWin();
+                }
+                else if (playerCharController.GetData().currentHealth <= 0)
+                {
+                    if(OnDefeat != null)
+                        OnDefeat();
+                }
+                else
+                {
+                    NextState();
+                }
             }
         }
 
@@ -222,6 +240,10 @@ namespace Numian
             if((!playerCharController.IsMoving() && !enemyCharController.IsMoving()) && movementCooldown.IsAvailable())
             {
                 StopMovementOfcharacters();
+                NextState();
+            }
+            if(playerCharController.GetData().currentHealth <= 0 || enemyCharController.GetData().currentHealth <= 0)
+            {
                 NextState();
             }
         }

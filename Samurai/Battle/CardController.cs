@@ -37,26 +37,26 @@ namespace Numian
             latinWords = new List<string>();
             traductions = new List<string>();
             
-            AddWord(Word.One, "一", "ICHI", "one");
-            AddWord(Word.Two, "二", "NI", "two");
-            AddWord(Word.Three, "三", "SAN", "three");
-            AddWord(Word.Four, "四", "SHI", "four");
-            AddWord(Word.Five, "五", "GO", "five");
-            AddWord(Word.Six, "六", "ROKU", "six");
-            AddWord(Word.Seven, "七", "SHICHI", "seven");
-            AddWord(Word.Eight, "八", "HACHI", "eight");
-            AddWord(Word.Nine, "九", "HACHI", "nine");
-            AddWord(Word.Ten, "十", "KU", "ten");
-            AddWord(Word.Hundred, "百", "", "hundred");
-            AddWord(Word.Thousand, "千", "", "thousand");
-            AddWord(Word.TenThousand, "万", "", "ten thousand");
-            AddWord(Word.Father, "父", "", "father");
-            AddWord(Word.Mother, "母", "", "mother");
-            AddWord(Word.Friend, "友", "", "friend");
-            AddWord(Word.Woman, "女", "", "woman");
-            AddWord(Word.Man, "男", "", "man");
-            AddWord(Word.Person, "人", "", "person");
-            AddWord(Word.Child, "子", "", "child");
+            AddWord(Word.One, "一", "ichi", "one");
+            AddWord(Word.Two, "二", "ni", "two");
+            AddWord(Word.Three, "三", "san", "three");
+            AddWord(Word.Four, "四", "shi", "four");
+            AddWord(Word.Five, "五", "go", "five");
+            AddWord(Word.Six, "六", "roku", "six");
+            AddWord(Word.Seven, "七", "shichi", "seven");
+            AddWord(Word.Eight, "八", "hachi", "eight");
+            AddWord(Word.Nine, "九", "kyuu", "nine");
+            AddWord(Word.Ten, "十", "juu", "ten");
+            AddWord(Word.Hundred, "百", "hyaku", "hundred");
+            AddWord(Word.Thousand, "千", "sen", "thousand");
+            AddWord(Word.TenThousand, "万", "man", "ten thousand");
+            AddWord(Word.Father, "父", "fu, bu", "father");
+            AddWord(Word.Mother, "母", "bo, bou", "mother");
+            AddWord(Word.Friend, "友", "yuu", "friend");
+            AddWord(Word.Woman, "女", "jo, nyo", "woman");
+            AddWord(Word.Man, "男", "dan, nan", "man");
+            AddWord(Word.Person, "人", "jin", "person");
+            AddWord(Word.Child, "子", "shi, su", "child");
 
             failures = new List<int>(new int[words.Count]);
             success = new List<int>(new int[words.Count]);
@@ -224,10 +224,10 @@ namespace Numian
             Word targetWord = dictionary.GetRandomWord();
             List<Word> possibleAnswers = dictionary.GetThreeRandomWordsFor(targetWord);
 
-            question.UpdateInfo(targetWord, dictionary.GetKanji(targetWord));
+            question.UpdateInfo(targetWord, dictionary.GetKanji(targetWord), dictionary.GetLatin(targetWord));
             for (int i = 0; i < 3; i++)
             {
-                answers[i].UpdateInfo(possibleAnswers[i], dictionary.GetTraduction(possibleAnswers[i]));
+                answers[i].UpdateAnswerInfo(possibleAnswers[i], dictionary.GetTraduction(possibleAnswers[i]));
             }
         }
 

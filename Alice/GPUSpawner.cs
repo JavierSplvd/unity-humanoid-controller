@@ -21,7 +21,7 @@ public class ObjData
         pos = position;
         if (randomScale)
         {
-            scale = Vector3.one * Random.RandomRange(0.8f, 1.2f);
+            scale = Vector3.one * Random.Range(0.8f, 1.2f);
         }
         else
         {

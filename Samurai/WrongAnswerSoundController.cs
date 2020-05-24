@@ -8,11 +8,11 @@ namespace Numian
     public class WrongAnswerSoundController : MonoBehaviour
     {
         private CardController cardController;
-        private AudioSource audio;
+        private AudioSource source;
         // Start is called before the first frame update
         void Start()
         {
-            audio = GetComponent<AudioSource>();
+            source = GetComponent<AudioSource>();
             cardController = GameObject.FindGameObjectWithTag(GameObjectTags.CardController.ToString()).GetComponent<CardController>();
             cardController.OnWrongAnswer += Play;
         }
@@ -25,8 +25,8 @@ namespace Numian
 
         private void Play()
         {
-            if(!audio.isPlaying)
-                audio.Play();
+            if(!source.isPlaying)
+                source.Play();
         }
     }
 }

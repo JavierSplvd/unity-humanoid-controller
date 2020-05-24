@@ -14,7 +14,7 @@ namespace Numian
         private List<string> traductions;
         private List<int> failures;
         private List<int> success;
-
+        public int level;
 
         public List<T> Shuffle<T>(IList<T> list)
         {
@@ -30,14 +30,20 @@ namespace Numian
             }
             return newList;
         }
-        // https://en.wikibooks.org/wiki/JLPT_Guide/JLPT_N5_Kanji
         public WordDictionary()
         {
+            Init(1);
+        }
+        // https://en.wikibooks.org/wiki/JLPT_Guide/JLPT_N5_Kanji
+        private void Init(int level)
+        {
+            this.level = level;
+
             words = new List<Word>();
             kanjis = new List<string>();
             latinWords = new List<string>();
             traductions = new List<string>();
-            
+            // 1
             AddWord(Word.One, "一", "ichi", "one");
             AddWord(Word.Two, "二", "ni", "two");
             AddWord(Word.Three, "三", "san", "three");
@@ -48,6 +54,7 @@ namespace Numian
             AddWord(Word.Eight, "八", "hachi", "eight");
             AddWord(Word.Nine, "九", "kyuu", "nine");
             AddWord(Word.Ten, "十", "juu", "ten");
+            // 2
             AddWord(Word.Hundred, "百", "hyaku", "hundred");
             AddWord(Word.Thousand, "千", "sen", "thousand");
             AddWord(Word.TenThousand, "万", "man", "ten thousand");
@@ -58,6 +65,17 @@ namespace Numian
             AddWord(Word.Man, "男", "dan, nan", "man");
             AddWord(Word.Person, "人", "jin", "person");
             AddWord(Word.Child, "子", "shi, su", "child");
+            // 3
+            AddWord(Word.Sun, "日", "", "sun");
+            AddWord(Word.Moon, "月", "", "moon");
+            AddWord(Word.Fire, "火", "", "fire");
+            AddWord(Word.Water, "水", "", "water");
+            AddWord(Word.Tree, "木", "", "tree");
+            AddWord(Word.Gold, "金", "", "gold");
+            AddWord(Word.Earth, "土", "", "earth");
+            AddWord(Word.Book, "本", "", "book");
+            AddWord(Word.Rest, "休", "", "rest");
+            AddWord(Word.Word, "語", "", "word");
 
             failures = new List<int>(new int[words.Count]);
             success = new List<int>(new int[words.Count]);
@@ -71,16 +89,28 @@ namespace Numian
             traductions.Add(traduction);
         }
 
+        private List<Word> WordsByDifficulty()
+        {
+            // limit the words depending on the level
+            return words.Take(level * 10).ToList();
+        }
+
         public Word GetRandomWord()
         {
-            return words[UnityEngine.Random.Range(0, words.Count)];
+            return words[UnityEngine.Random.Range(0, WordsByDifficulty().Count)];
         }
 
         public List<Word> GetThreeRandomWordsFor(Word w)
         {
-            List<Word> randomWords = new List<Word>();
-            List<Word> shuffleWords = Shuffle(words);
+            // limit the words depending on the level
+            List<Word> poolOfWords = WordsByDifficulty();
+
+            List<Word> shuffleWords = Shuffle(poolOfWords);
+            Debug.Log(String.Join("///", shuffleWords));
             shuffleWords.Remove(w);
+
+            // randomized selection of three words
+            List<Word> randomWords = new List<Word>();
             randomWords.Add(shuffleWords[0]);
             randomWords.Add(shuffleWords[1]);
             randomWords.Add(w);
@@ -121,6 +151,8 @@ namespace Numian
             }
             return l;
         }
+
+        public void SetLevel(int level) => this.level = level;
     }
     public class WordStatAggregator
     {
@@ -175,7 +207,12 @@ namespace Numian
             originalPos = rectTransform.localPosition;
             currentPos = rectTransform.localPosition;
             verticalPosSpring = new Spring(100, 1, originalPos.y);
+            // dictionary related stuff
             dictionary = Savegame.LoadDictionary();
+            DifficultyController difficulty = GameObject
+                .FindGameObjectWithTag(GameObjectTags.DifficultyController.ToString())
+            .GetComponent<DifficultyController>();
+            dictionary.SetLevel(difficulty.GetLevel());
             wordStats = new WordStatAggregator(dictionary, this);
             // Get parents
             for (int i = 0; i < transform.childCount; i++)

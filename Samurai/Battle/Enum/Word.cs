@@ -21,6 +21,16 @@ namespace Numian
         Woman,
         Man,
         Person,
-        Child
+        Child,
+        Sun, // block 3
+        Moon,
+        Fire,
+        Water,
+        Tree,
+        Gold,
+        Earth,
+        Book,
+        Rest,
+        Word
     }
 }

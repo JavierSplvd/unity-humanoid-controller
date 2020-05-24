@@ -7,6 +7,7 @@ namespace Numian
         Damageable,
         BattleController,
         PlayerTeam,
-        CardController
+        CardController,
+        DifficultyController
     }
 }

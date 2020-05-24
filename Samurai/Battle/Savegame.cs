@@ -22,6 +22,7 @@ namespace Numian
         {
             if(File.Exists(path))
             {
+                Debug.LogWarning("Save exists at:" + path);
                 BinaryFormatter formatter = new BinaryFormatter();
                 FileStream stream = new FileStream(path, FileMode.Open);
 

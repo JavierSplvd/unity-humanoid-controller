@@ -66,16 +66,16 @@ namespace Numian
             AddWord(Word.Person, "人", "jin", "person");
             AddWord(Word.Child, "子", "shi, su", "child");
             // 3
-            AddWord(Word.Sun, "日", "", "sun");
-            AddWord(Word.Moon, "月", "", "moon");
-            AddWord(Word.Fire, "火", "", "fire");
-            AddWord(Word.Water, "水", "", "water");
-            AddWord(Word.Tree, "木", "", "tree");
-            AddWord(Word.Gold, "金", "", "gold");
-            AddWord(Word.Earth, "土", "", "earth");
-            AddWord(Word.Book, "本", "", "book");
-            AddWord(Word.Rest, "休", "", "rest");
-            AddWord(Word.Word, "語", "", "word");
+            AddWord(Word.Sun, "日", "nichi, jitsu", "sun");
+            AddWord(Word.Moon, "月", "getsu, gatsu", "moon");
+            AddWord(Word.Fire, "火", "ka", "fire");
+            AddWord(Word.Water, "水", "sui, mizu", "water");
+            AddWord(Word.Tree, "木", "boku, moku", "tree");
+            AddWord(Word.Gold, "金", "kin, kon", "gold");
+            AddWord(Word.Earth, "土", "do, to", "earth");
+            AddWord(Word.Book, "本", "hon", "book");
+            AddWord(Word.Rest, "休", "kyuu, yasu", "rest");
+            AddWord(Word.Speak, "語", "go", "speak");
 
             failures = new List<int>(new int[words.Count]);
             success = new List<int>(new int[words.Count]);
@@ -106,7 +106,8 @@ namespace Numian
             List<Word> poolOfWords = WordsByDifficulty();
 
             List<Word> shuffleWords = Shuffle(poolOfWords);
-            Debug.Log(String.Join("///", shuffleWords));
+            Debug.Log("Level:" +level);
+            Debug.Log(String.Join("///", words));
             shuffleWords.Remove(w);
 
             // randomized selection of three words

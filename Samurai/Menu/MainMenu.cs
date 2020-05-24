@@ -9,7 +9,7 @@ namespace Numian
     {
         public void PlayGame()
         {
-            SceneManager.LoadScene(1);
+            SceneManager.LoadSceneAsync((int) Scenes.Battle);
         }
 
         public void QuitGame()

@@ -31,6 +31,6 @@ namespace Numian
         Earth,
         Book,
         Rest,
-        Word
+        Speak
     }
 }

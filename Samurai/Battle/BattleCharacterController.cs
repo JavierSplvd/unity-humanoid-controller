@@ -180,7 +180,6 @@ namespace Numian
             ReceiveDamage(damage);
             if (OnCharacterIsHurted != null)
             {
-                Debug.Log("hurted");
                 OnCharacterIsHurted();
 
             }

@@ -20,14 +20,21 @@ namespace Numian
         void Start()
         {
             Debug.Log("volume");
+            spring = new Spring(40, 1, minVignette);
+
+            volume = GetComponent<Volume>();
+            volume.profile.TryGet(out vignette);
             controller = GameObject
                 .FindGameObjectWithTag(GameObjectTags.BattleController.ToString())
             .GetComponent<TurnBasedBattleController>();
-            volume = GetComponent<Volume>();
-            volume.profile.TryGet(out vignette);
-            controller.GetStateMachine().OnPlayerAction += MaxVignette;
-            controller.GetStateMachine().OnPlayerLateMovement += ReduceVignette;
-            spring = new Spring(40, 1, minVignette);
+            if(controller != null)
+            {
+                Debug.LogWarning("TurnBasedBattleController not found in scene.");
+                controller.GetStateMachine().OnPlayerAction += MaxVignette;
+                controller.GetStateMachine().OnPlayerLateMovement += ReduceVignette;
+            
+            }
+            
         }
 
         // Update is called once per frame
@@ -39,13 +46,11 @@ namespace Numian
 
         private void MaxVignette()
         {
-            Debug.Log("max");
             spring.SetX0(maxVignette);
         }
 
         private void ReduceVignette()
         {
-            Debug.Log("min");
             spring.SetX0(minVignette);
         }
     }

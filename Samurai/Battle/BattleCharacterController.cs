@@ -23,6 +23,8 @@ namespace Numian
         [SerializeField]
         private Transform restPosition;
         private Spring movementSpring;
+        [SerializeField]
+        private int nAttacks;
 
         [SerializeField]
         private float distanceToRestPos;
@@ -106,34 +108,39 @@ namespace Numian
 
         public void Attack()
         {
-            switch ((int)UnityEngine.Random.Range(0, 1.99999f))
+            switch ((int)UnityEngine.Random.Range(0, (float) nAttacks))
             {
                 case 0:
-                    AttackAirStance();
+                    DoAttackStance("A1");
                     break;
                 case 1:
-                    AttackMountainStance();
+                    DoAttackStance("A2");
                     break;
                 case 2:
-                    AttackSeaStance();
+                    DoAttackStance("A3");
+                    break;
+                case 3:
+                    DoAttackStance("C1A1");
+                    break;
+                case 4:
+                    DoAttackStance("C1A2");
+                    break;
+                case 5:
+                    DoAttackStance("C1A3");
+                    break;
+                case 6:
+                    DoAttackStance("C1A4");
+                    break;
+                case 7:
+                    DoAttackStance("C2A1");
+                    break;
+                case 8:
+                    DoAttackStance("C2A2");
+                    break;
+                default:
+                    DoAttackStance("C2A3");
                     break;
             }
-        }
-
-        void AttackAirStance()
-        {
-            currentStance = Stances.HighStance;
-            DoAttackStance("AirAttack");
-        }
-        void AttackMountainStance()
-        {
-            currentStance = Stances.MiddleStance;
-            DoAttackStance("MountainAttack");
-        }
-        void AttackSeaStance()
-        {
-            currentStance = Stances.LowStance;
-            DoAttackStance("SeaAttack");
         }
 
         private void DoAttackStance(string s)

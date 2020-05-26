@@ -33,11 +33,7 @@ namespace Numian
         }
         void ReduceCounter()
         {
-            comboCount -= 1;
-            if(comboCount <= 0)
-            {
-                comboCount = 0;
-            }
+            comboCount = 0;
             FireEvent();
         }
 

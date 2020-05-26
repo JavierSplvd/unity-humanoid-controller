@@ -10,6 +10,9 @@ public class SwordVelocity : MonoBehaviour
 
     public delegate void SwordIsQuick();
     public event SwordIsQuick OnSwordIsQuick;
+    
+    public delegate void SwordIsSlow();
+    public event SwordIsSlow OnSwordIsSlow;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,5 +26,7 @@ public class SwordVelocity : MonoBehaviour
         pastPos = transform.position;
         if(velocity > threshold)
             OnSwordIsQuick();
+        else
+            OnSwordIsSlow();
     }
 }

@@ -187,8 +187,8 @@ namespace Numian
                 if (upkeepCooldown == null)
                 {
                     upkeepCooldown = new SimpleCooldown(0.3f);
-                    ResetPlayer();
                     upkeepCooldown.Heat();
+
                 }
                 // During
                 upkeepCooldown.Update();
@@ -260,11 +260,6 @@ namespace Numian
         private void ActivateEnemyMovement()
         {
             enemyCharController.MoveRestPosition();
-        }
-
-        private void ResetPlayer()
-        {
-            playerCharController.ResetMove();
         }
 
         private void EnemyTurn()

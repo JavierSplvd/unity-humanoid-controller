@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Numian
@@ -9,10 +10,23 @@ namespace Numian
         private Cooldown cooldown;
         [SerializeField]
         private BattleCharacterController controller;
+        private SwordVelocity swordVelocity;
 
         void Start()
         {
-            cooldown = new SimpleCooldown(0.4f);
+            cooldown = new SimpleCooldown(0.1f);
+            swordVelocity.OnSwordIsQuick += SetDamageActiveTrue;
+            swordVelocity.OnSwordIsSlow += SetDamageActiveFalse;
+        }
+
+        private void SetDamageActiveTrue()
+        {
+            SetDamageActive(true);
+        }
+
+        private void SetDamageActiveFalse()
+        {
+            SetDamageActive(false);
         }
 
         // Update is called once per frame
@@ -28,7 +42,6 @@ namespace Numian
             {
                 other.gameObject.SendMessage("ReceiveDamage", new AttackData(damageValue, controller.GetStance()));
                 cooldown.Heat();
-                damageActive = false;
             }
         }
 
@@ -36,9 +49,10 @@ namespace Numian
         {
             damageValue = v;
         }
-        public void SetDamageActive()
+        public void SetDamageActive(bool value)
         {
-            damageActive = true;
+            Debug.Log("damage active: " + value);
+            damageActive = value;
         }
 
     }

@@ -10,6 +10,8 @@ namespace Numian
     {
         [SerializeField]
         private Combo combo;
+        [SerializeField]
+        private Image[] katanaIcons;
         private Text comboText;
         // Start is called before the first frame update
         void Start()
@@ -17,6 +19,7 @@ namespace Numian
             combo.OnComboChange += UpdateText;
             comboText = GetComponent<Text>();
             comboText.text = "";
+            UpdateText();
         }
 
         // Update is called once per frame
@@ -30,6 +33,17 @@ namespace Numian
             else
             {
                 comboText.text = "Combo x" + count.ToString();
+            }
+
+            Color color;
+            for(int i = 0; i < katanaIcons.Length; i++)
+            {
+                color = katanaIcons[i].color;
+                if(i<count)
+                    color.a = 1;
+                else
+                    color.a = 0;
+                katanaIcons[i].color = color;
             }
         }
     }

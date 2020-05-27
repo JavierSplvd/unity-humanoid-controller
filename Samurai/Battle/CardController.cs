@@ -75,7 +75,62 @@ namespace Numian
             AddWord(Word.Earth, "土", "do, to", "earth");
             AddWord(Word.Book, "本", "hon", "book");
             AddWord(Word.Rest, "休", "kyuu, yasu", "rest");
-            AddWord(Word.Speak, "語", "go", "speak");
+            AddWord(Word.Talk,"話","hanashi","talk");
+            // 4
+            AddWord(Word.Year,"年","toshi","year");
+            AddWord(Word.Noon,"午","hiru","noon");
+            AddWord(Word.Before,"前","zen","before; in front of; previous");
+            AddWord(Word.After,"後","ato","behind; after");
+            AddWord(Word.Time,"時","toki","time; hour counter");
+            AddWord(Word.Interval,"間","aida","interval");
+            AddWord(Word.Every,"毎","mai","every");
+            AddWord(Word.Previous,"先","saki","previous");
+            AddWord(Word.Now,"今","ima","now");
+            AddWord(Word.What,"何","nani","what");
+            // 5
+            AddWord(Word.Top,"上","ue","top");
+            AddWord(Word.Bottom,"下","shita","bottom");
+            AddWord(Word.Left,"左","hidari","left");
+            AddWord(Word.Right,"右","migi","right");
+            AddWord(Word.North,"北","kita","north");
+            AddWord(Word.South,"南","minami","south");
+            AddWord(Word.East,"東","azuma","east");
+            AddWord(Word.West,"西","nishi","west");
+            AddWord(Word.Outside,"外","soto","outside");
+            AddWord(Word.Name,"名","na","name");
+            // 6
+            AddWord(Word.High,"高","kou","high");
+            AddWord(Word.Small,"小","shou","small");
+            AddWord(Word.Middle,"中","naka","middle");
+            AddWord(Word.Great,"大","oo","great");
+            AddWord(Word.Long,"長","take","long");
+            AddWord(Word.Half,"半","han","half");
+            AddWord(Word.Part,"分","fun","part");
+            AddWord(Word.Learning,"学","gaku","learning");
+            AddWord(Word.School,"校","kou","school");
+            AddWord(Word.Birth,"生","ubu","birth");
+            // 7
+            AddWord(Word.Mountain,"山","yama","mountain");
+            AddWord(Word.River,"川","kawa","river");
+            AddWord(Word.White,"白","shiro","white");
+            AddWord(Word.Heaven,"天","ten","heaven");
+            AddWord(Word.Rain,"雨","ame","rain");
+            AddWord(Word.Electricity,"電","inazuma","electricity");
+            AddWord(Word.Spirit,"気","ki","spirit");
+            AddWord(Word.Wheel,"車","kuruma","wheel; vehicle; car");
+            AddWord(Word.Country,"国","kuni","country");
+            AddWord(Word.Circle,"円","en","circle; yen (money)");
+            // 8
+            AddWord(Word.Hear,"聞","","to hear");
+            AddWord(Word.Eat,"食","shoku","eating");
+            AddWord(Word.Read,"読","aidoku","to read");
+            AddWord(Word.Come,"来","rai","to come");
+            AddWord(Word.Book,"書","sho","document, book");
+            AddWord(Word.Show,"見","mi","to show");
+            AddWord(Word.Go,"行","kou","to go");
+            AddWord(Word.GoOut,"出","de","to go out");
+            AddWord(Word.Enter,"入","iri","enter");
+            AddWord(Word.Meet,"会","kai","to meet");
 
             failures = new List<int>(new int[words.Count]);
             success = new List<int>(new int[words.Count]);
@@ -213,7 +268,7 @@ namespace Numian
             DifficultyController difficulty = GameObject
                 .FindGameObjectWithTag(GameObjectTags.DifficultyController.ToString())
             .GetComponent<DifficultyController>();
-            dictionary.SetLevel(difficulty.GetLevel());
+            dictionary.SetLevel((int) difficulty.GetLevel());
             wordStats = new WordStatAggregator(dictionary, this);
             // Get parents
             for (int i = 0; i < transform.childCount; i++)
@@ -256,7 +311,11 @@ namespace Numian
             // currentPos.x = transform.position.x;
             currentPos.y = verticalPosSpring.GetX();
             rectTransform.localPosition = currentPos;
-            verticalPosSpring.Update(Time.deltaTime);
+        }
+
+        void FixedUpdate()
+        {
+            verticalPosSpring.FixedUpdate(Time.fixedDeltaTime);
         }
 
         void ShuffleCards()

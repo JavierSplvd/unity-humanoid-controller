@@ -10,11 +10,11 @@ public class Spring
         this.x = x0;
     }
 
-    public void Update(float deltaTime)
+    public void FixedUpdate(float delta)
     {
         a = - k * (x-x0) / m;
-        v = a * deltaTime + 0.8f * v; // 20% damping
-        x += v * deltaTime;
+        v = a * delta + v - v * 9f * delta;
+        x += v * delta;
     }
 
     public float GetX()

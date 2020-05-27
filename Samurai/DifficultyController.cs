@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -8,7 +9,7 @@ namespace Numian
     public class DifficultyController : MonoBehaviour
     {
         [SerializeField]
-        private int level;
+        private Difficulties level;
         [SerializeField]
         private int hash;
         void Awake() {
@@ -33,9 +34,15 @@ namespace Numian
         
         public void SetLevel(int level)
         {
-            this.level = level;
+            Debug.Log("SetLevel" + level);
+            List<Difficulties> l = Enum.GetValues(typeof(Difficulties)).Cast<Difficulties>().ToList();
+            foreach(Difficulties d in l)
+            {
+                if(l.IndexOf(d) == level)
+                    this.level = l[level];
+            }
         } 
 
-        public int GetLevel() => level;
+        public Difficulties GetLevel() => level;
     }
 }

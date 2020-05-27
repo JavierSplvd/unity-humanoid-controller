@@ -153,7 +153,7 @@ public class BaseHumanController : MonoBehaviour
             runMultiplier.SetX0(1f);
             stamina.Recover(Time.deltaTime);
         }
-        runMultiplier.Update(Time.deltaTime);
+        runMultiplier.FixedUpdate(Time.deltaTime);
     }
 
     void ChangeForwardMultiplier()
@@ -170,7 +170,7 @@ public class BaseHumanController : MonoBehaviour
                     break;
             }
         }
-        crouchMultiplier.Update(Time.deltaTime);
+        crouchMultiplier.FixedUpdate(Time.deltaTime);
 
     }
 

@@ -30,7 +30,7 @@ namespace Numian
 
                 stream.Close();
 
-                return dictionary;
+                return new WordDictionary();
             }
             else
             {

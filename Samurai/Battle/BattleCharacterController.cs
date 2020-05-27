@@ -17,8 +17,6 @@ namespace Numian
         [SerializeField]
         private DoDamage weapon;
         [SerializeField]
-        private Stances currentStance = Stances.MiddleStance;
-        [SerializeField]
         private Vector3 steerEuler;
         [SerializeField]
         private Transform restPosition;
@@ -61,8 +59,13 @@ namespace Numian
             if (data.currentHealth <= 0)
                 animator.SetTrigger("die");
             animator.SetFloat("forward", movementSpring.GetX());
-            movementSpring.Update(Time.deltaTime);
             
+        }
+
+        void FixedUpdate()
+        {
+            movementSpring.FixedUpdate(Time.fixedDeltaTime);
+
         }
 
         public void MoveRestPosition()
@@ -153,7 +156,6 @@ namespace Numian
                 OnCharacterHasRested();
         }
         public CharacterData GetData() => data;
-        public Stances GetStance() => currentStance;
 
         public void ReceiveDamage(int attackValue)
         {
@@ -173,8 +175,6 @@ namespace Numian
         public void ReceiveDamage(AttackData data)
         {
             int damage = data.GetAttackValue();
-            if (IsWeakTowardsStance(data.GetStance()))
-                damage = damage * 2;
             ReceiveDamage(damage);
             if (OnCharacterIsHurted != null)
             {
@@ -182,17 +182,6 @@ namespace Numian
 
             }
             animator.SetTrigger("hit");
-        }
-
-        private bool IsWeakTowardsStance(Stances targetStance)
-        {
-            if (targetStance.Equals(Stances.HighStance) && currentStance.Equals(Stances.MiddleStance))
-                return true;
-            if (targetStance.Equals(Stances.MiddleStance) && currentStance.Equals(Stances.LowStance))
-                return true;
-            if (targetStance.Equals(Stances.LowStance) && currentStance.Equals(Stances.HighStance))
-                return true;
-            return false;
         }
 
         public bool IsMoving()

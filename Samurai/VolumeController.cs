@@ -41,7 +41,11 @@ namespace Numian
         void Update()
         {
             vignette.intensity.value = spring.GetX();
-            spring.Update(Time.deltaTime);
+        }
+
+        void FixedUpdate()
+        {
+            spring.FixedUpdate(Time.fixedDeltaTime);
         }
 
         private void MaxVignette()

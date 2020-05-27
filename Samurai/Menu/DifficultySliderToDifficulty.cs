@@ -1,27 +1,25 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace Numian
 {
-    public class MainMenu : MonoBehaviour
+    public class DifficultySliderToDifficulty : MonoBehaviour
     {
         private DifficultyController difficulty;
+        private Slider kanjiSlider;
         void Start()
         {
             difficulty = GameObject.FindGameObjectWithTag(GameObjectTags.DifficultyController.ToString())
                 .GetComponent<DifficultyController>();
+            kanjiSlider = GetComponent<Slider>();
+            kanjiSlider.onValueChanged.AddListener(delegate {ValueChanged();});
         }
 
-        public void PlayGame()
+        private void ValueChanged()
         {
-            SceneManager.LoadSceneAsync((int) Scenes.Battle);
-        }
-
-        public void QuitGame()
-        {
-            Application.Quit();
+            difficulty.SetLevel((int) kanjiSlider.value);
         }
     }
 }

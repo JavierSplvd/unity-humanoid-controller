@@ -40,7 +40,7 @@ namespace Numian
 
             if (other.tag.Equals("Damageable") && cooldown.IsAvailable() && damageActive)
             {
-                other.gameObject.SendMessage("ReceiveDamage", new AttackData(damageValue, controller.GetStance()));
+                other.gameObject.SendMessage("ReceiveDamage", new AttackData(damageValue));
                 cooldown.Heat();
             }
         }

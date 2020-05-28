@@ -19,6 +19,8 @@ namespace Numian
 
         private void ValueChanged()
         {
+            if((int) kanjiSlider.value == 0)
+                kanjiSlider.value = 1;
             difficulty.SetLevel((int) kanjiSlider.value);
         }
     }

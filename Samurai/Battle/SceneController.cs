@@ -8,7 +8,7 @@ namespace Numian
     public class SceneController : MonoBehaviour
     {
         private TurnBasedBattleController controller;
-        private Cooldown cooldown = new SimpleCooldown(1.2f);
+        private Cooldown waitOnVictory = new SimpleCooldown(2.2f);
         // Start is called before the first frame update
         void Start()
         {
@@ -17,20 +17,20 @@ namespace Numian
             .GetComponent<TurnBasedBattleController>();
             controller.OnWin += LoadStartScreen;
             controller.OnDefeat += LoadStartScreen;
-            cooldown.Heat();
+            waitOnVictory.Heat();
 
         }
 
         // Update is called once per frame
         void Update()
         {
-            if(cooldown.IsAvailable())
+            if(waitOnVictory.IsAvailable())
                 SceneManager.LoadSceneAsync((int) Scenes.Start, mode:LoadSceneMode.Single);
         }
 
         private void LoadStartScreen()
         {
-            cooldown.Update();
+            waitOnVictory.Update();
         }
     }
 }

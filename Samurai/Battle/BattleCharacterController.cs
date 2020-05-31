@@ -100,7 +100,7 @@ namespace Numian
         private void Steer()
         {
             transform.rotation = Quaternion
-                .RotateTowards(transform.rotation, Quaternion.Euler(steerEuler.x, steerEuler.y, steerEuler.z), Time.deltaTime * 0.2f);
+                .RotateTowards(transform.rotation, Quaternion.Euler(steerEuler.x, steerEuler.y, steerEuler.z), Time.deltaTime * 10f);
         }
 
         private void CenterForward()

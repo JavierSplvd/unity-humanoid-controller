@@ -38,7 +38,21 @@ namespace Numian
 
         public void PlayGame()
         {
-            SceneManager.LoadSceneAsync((int) Scenes.Battle);
+            switch(difficulty.GetLevel())
+            {
+                case Difficulties.D1: case Difficulties.D2: case Difficulties.D3: case Difficulties.D4:
+                    SceneManager.LoadSceneAsync((int) Scenes.Town);
+                    break;
+                case Difficulties.D5: case Difficulties.D6:
+                    SceneManager.LoadSceneAsync((int) Scenes.Forest);
+                    break;
+                case Difficulties.D7: case Difficulties.D8:
+                    SceneManager.LoadSceneAsync((int) Scenes.Battlefield);
+                    break;
+                default:
+                    SceneManager.LoadSceneAsync((int) Scenes.Town);
+                    break;
+            }
         }
 
         public void QuitGame()

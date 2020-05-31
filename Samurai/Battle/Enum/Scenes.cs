@@ -3,6 +3,8 @@ namespace Numian
     public enum Scenes
     {
         Start,
-        Battle,
+        Town,
+        Forest,
+        Battlefield
     }
 }

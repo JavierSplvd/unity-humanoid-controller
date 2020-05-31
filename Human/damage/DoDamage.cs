@@ -5,16 +5,18 @@ namespace Numian
 {
     public class DoDamage : MonoBehaviour
     {
+        [SerializeField]
         private bool damageActive;
         private int damageValue;
         private Cooldown cooldown;
-        [SerializeField]
-        private BattleCharacterController controller;
         private SwordVelocity swordVelocity;
 
         void Start()
         {
             cooldown = new SimpleCooldown(0.1f);
+            swordVelocity = GetComponent<SwordVelocity>();
+            if(swordVelocity == null)
+                throw new MissingReferenceException("SwordVelocity component missing.");
             swordVelocity.OnSwordIsQuick += SetDamageActiveTrue;
             swordVelocity.OnSwordIsSlow += SetDamageActiveFalse;
         }

@@ -6,6 +6,7 @@ public class Jiggle : MonoBehaviour
 {
 
     public bool debugMode = true;
+    public bool fixRotation = true;
  
 	// Target and dynamic positions
 	public Vector3 targetPos = new Vector3();
@@ -13,6 +14,7 @@ public class Jiggle : MonoBehaviour
  
 	// Bone settings
 	public Vector3 boneAxis = new Vector3(0,0,1);
+	public Vector3 upVector = new Vector3(-1,0,0);
 	public float targetDistance = 2.0f;
 	public float maxDistancePercentage = 0.1f;
  
@@ -33,7 +35,6 @@ public class Jiggle : MonoBehaviour
 	public float frontStretch = 0.2f;
 
 	private Vector3 forwardVector = Vector3.zero;
-	private Vector3 upVector = Vector3.zero;
 	private Vector3 dynamicPosSanitized = Vector3.zero;
  
 	void Awake(){
@@ -48,7 +49,6 @@ public class Jiggle : MonoBehaviour
  
 		// Update forwardVector and upVector
 		forwardVector = transform.TransformDirection(new Vector3((boneAxis.x * targetDistance),(boneAxis.y * targetDistance),(boneAxis.z * targetDistance)));
-		upVector = transform.TransformDirection(new Vector3(0,1,0));
  
 		// Calculate target position
 		targetPos = transform.position + transform.TransformDirection(new Vector3((boneAxis.x * targetDistance),(boneAxis.y * targetDistance),(boneAxis.z * targetDistance)));
@@ -83,11 +83,10 @@ public class Jiggle : MonoBehaviour
 
  
 		// Set bone rotation to look at dynamicPos
-		// transform.LookAt(dynamicPos, upVector);
-        transform.LookAt(dynamicPosSanitized, -Vector3.right);
+		transform.LookAt(dynamicPos, upVector);
 		
 		// Keep always the right vector (red) upwards
-		if(transform.right.y < 0)
+		if(fixRotation && transform.right.y < 0)
         {
             transform.Rotate(new Vector3(0,0,180));
         }

@@ -25,4 +25,6 @@ public class SimpleCooldown : Cooldown
     {
         currentTime = Mathf.Clamp(currentTime - Time.deltaTime, 0, maxTime);
     }
+
+    public override float GetCurrentTime() => currentTime;
 }

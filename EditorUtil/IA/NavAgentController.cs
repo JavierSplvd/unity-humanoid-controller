@@ -12,9 +12,15 @@ public class NavAgentController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        transform.position = subject.transform.position;
         navMeshAgent = GetComponent<NavMeshAgent>();
-        InvokeRepeating("MoveAgent", 1f, 1f);
-        InvokeRepeating("Unstuck", 15f, 15f);
+        // InvokeRepeating("MoveAgent", 1f, 1f);
+        // InvokeRepeating("Unstuck", 15f, 15f);
+    }
+
+    void Update()
+    {
+        MoveAgent();
     }
 
     void MoveAgent()
